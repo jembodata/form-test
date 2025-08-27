@@ -26,11 +26,21 @@ class LatestLaporans extends BaseWidget
                 // ...
 
                 TextColumn::make('created_at')->label('dibuat pada')->dateTime('d M Y H:i'),
-                TextColumn::make('karyawans.nama')->label('Nama'),
-                TextColumn::make('karyawans.nik')->label('NIK'),
+                TextColumn::make('karyawans.nama')->label('Nama')->listWithLineBreaks(),
+                TextColumn::make('karyawans.nik')->label('NIK')->listWithLineBreaks(),
                 TextColumn::make('mesins.nama_plant')->label('Plant'),
                 TextColumn::make('mesins.nama_mesin')->label('Mesin'),
                 TextColumn::make('shift')->label('Shift'),
+                TextColumn::make('detail_produksi')
+                    ->label('No OP')
+                    ->state(function (Laporan $record) {
+                        $result = [];
+                        foreach ($record->detail_produksi as $detail_produksi) {
+                            $result[] = "{$detail_produksi['op']}";
+                        }
+                        return $result;
+                    })
+                    ->listWithLineBreaks(),
             ])
             ->actions([
                 // Tables\Actions\ViewAction::make()
