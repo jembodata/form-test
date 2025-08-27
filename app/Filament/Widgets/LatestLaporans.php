@@ -68,6 +68,7 @@ class LatestLaporans extends BaseWidget
                 //         ])
                 // ]),
             ])
-            ->defaultPaginationPageOption(5);
+            ->defaultPaginationPageOption(5)
+            ->paginated([5]);
     }
 }
