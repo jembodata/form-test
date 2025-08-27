@@ -151,7 +151,7 @@
 <body class="bg-white text-gray-900 font-sans">
 
     <!-- Header / Navigation -->
-    <header class="fixed top-0 left-0 w-full bg-white shadow-sm z-10">
+    <header class="fixed top-0 left-0 w-full bg-white shadow-sm z-30">
         <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
             <div class="text-xl font-medium text-gray-800">
                 LHK Digital
