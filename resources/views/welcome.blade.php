@@ -182,7 +182,7 @@
         </div>
 
         <!-- Konten utama di atas animasi -->
-        <div id="main-content" class="text-center px-6 md:px-8 z-20 relative fade-in">
+        <div id="main-content" class="px-6 md:px-8 z-20 relative fade-in">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <!-- Left Column -->
                 <div class="p-4">

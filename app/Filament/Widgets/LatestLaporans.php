@@ -18,6 +18,7 @@ class LatestLaporans extends BaseWidget
     {
         return $table
             ->heading('Data laporan')
+            ->description('5 Laporan terbaru')
             ->query(
                 // ...
                 Laporan::orderBy('created_at', 'desc')
