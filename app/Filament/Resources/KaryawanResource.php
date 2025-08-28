@@ -24,6 +24,8 @@ class KaryawanResource extends Resource
 
     protected static ?string $navigationLabel = 'Data Karyawan';
 
+    protected static ?string $navigationGroup = 'Settings';
+
     public static function form(Form $form): Form
     {
         return $form

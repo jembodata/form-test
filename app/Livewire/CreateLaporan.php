@@ -231,6 +231,7 @@ class CreateLaporan extends Component implements HasForms, HasActions
                                                     ->label('Proses')
                                                     ->searchable()
                                                     ->required()
+                                                    ->live()
                                                     ->options([
                                                         'Coloring' => 'Coloring',
                                                         'Tubing' => 'Tubing',
@@ -293,6 +294,12 @@ class CreateLaporan extends Component implements HasForms, HasActions
                                                     ->numeric()
                                                     ->minValue(0)
                                                     ->live(debounce: 500)
+                                                    ->suffix(function (Get $get){
+                                                        return match ($get('proses')) {
+                                                            'Drawing' => 'm/s',
+                                                            default => 'm/min'
+                                                        };
+                                                    })
                                                     ->afterStateUpdated(function ($livewire, Forms\Components\TextInput $component) {
                                                         $livewire->validateOnly($component->getStatePath());
                                                     }),

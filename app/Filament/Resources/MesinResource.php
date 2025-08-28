@@ -23,6 +23,8 @@ class MesinResource extends Resource
 
     protected static ?string $navigationLabel = 'Data Mesin';
 
+    protected static ?string $navigationGroup = 'Settings';
+
     public static function form(Form $form): Form
     {
         return $form
