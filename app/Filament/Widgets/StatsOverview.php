@@ -24,7 +24,7 @@ class StatsOverview extends BaseWidget
             //     ->description('Jumlah laporan tanpa kendala')
             //     ->color('primary'),
             Stat::make('Laporan', Laporan::count())
-                ->description('Jumlah laporan mesin')
+                ->description('Jumlah laporan')
                 ->color('primary'),
             // Stat::make('Mesin', Laporan::distinct('mesin_id')->count())
             //     ->description('Jumlah mesin yang dilaporkan')

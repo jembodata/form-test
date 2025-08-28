@@ -366,8 +366,11 @@ class LaporanResource extends Resource
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('dibuat pada')
                     ->date(),
+                Tables\Columns\TextColumn::make('kode_laporan')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('karyawans.nama')
                     ->label('Nama')
+                    ->listWithLineBreaks()
                     ->searchable(),
                 // Tables\Columns\TextColumn::make('feedback')
                 //     ->label('Kendala')
@@ -380,8 +383,6 @@ class LaporanResource extends Resource
                 //         'Ada' => 'danger',
                 //     })
                 //     ->searchable(),
-                Tables\Columns\TextColumn::make('kode_laporan')
-                    ->searchable(),
                 Tables\Columns\TextColumn::make('shift')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('mesins.nama_mesin')
@@ -409,7 +410,8 @@ class LaporanResource extends Resource
                         }
                         return $result;
                     })
-                    ->searchable(),
+                    ->searchable()
+                    ->listWithLineBreaks(),
                 // ->bulleted(),
 
             ])
