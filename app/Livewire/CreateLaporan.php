@@ -294,7 +294,7 @@ class CreateLaporan extends Component implements HasForms, HasActions
                                                     ->numeric()
                                                     ->minValue(0)
                                                     ->live(debounce: 500)
-                                                    ->suffix(function (Get $get){
+                                                    ->suffix(function (Get $get) {
                                                         return match ($get('proses')) {
                                                             'Drawing' => 'm/s',
                                                             default => 'm/min'
@@ -499,31 +499,56 @@ class CreateLaporan extends Component implements HasForms, HasActions
 
     public static function generateKodeLaporan($mesinId)
     {
-        // Ambil mesin berdasarkan mesin_id
         $mesin = Mesin::find($mesinId);
+        if (!$mesin) return 'Invalid Mesin';
 
-        // Pastikan mesin ditemukan
-        if (!$mesin) {
-            return 'Invalid Mesin'; // Fallback jika mesin tidak ditemukan
-        }
+        $plantCode = $mesin->nama_plant;
+        $mesinCode = $mesin->nama_mesin;
 
-        // Ambil nama_plant dan nama_mesin dari mesin
-        $plantCode = $mesin->nama_plant; // Nama plant dari mesin
-        $mesinCode = $mesin->nama_mesin; // Nama mesin dari mesin
+        // SERTAKAN tanggal penuh di KODE (bukan cuma year 2 digit)
+        $ymd = now()->format('y');
+        $prefix = "{$plantCode}{$ymd}{$mesinCode}";
 
-        // Ambil tanggal hari ini
-        $today = now()->format('y');
-
-        // Ambil nomor urut terakhir untuk hari ini berdasarkan mesin
-        $lastReport = Laporan::whereDate('created_at', now()->toDateString())
-            ->where('mesin_id', $mesinId)
-            ->latest('id')
+        // Cari LAST berdasarkan prefix (jangan filter by today lagi, prefix sudah bawa tanggal)
+        $last = Laporan::where('kode_laporan', 'like', $prefix . '%')
+            ->orderByDesc('kode_laporan')
             ->first();
 
-        // Tentukan nomor urut untuk laporan baru
-        $urut = $lastReport ? str_pad((int) substr($lastReport->kode_laporan, -3) + 1, 3, '0', STR_PAD_LEFT) : '001';
+        $urut = $last && preg_match('/(\d+)$/', $last->kode_laporan, $m)
+            ? str_pad(((int)$m[1]) + 1, 3, '0', STR_PAD_LEFT)
+            : '001';
 
-        // Gabungkan menjadi kode laporan
-        return "{$plantCode}{$today}{$mesinCode}{$urut}";
+        return $prefix . $urut;
     }
+
+
+    // public static function generateKodeLaporan($mesinId)
+    // {
+    //     // Ambil mesin berdasarkan mesin_id
+    //     $mesin = Mesin::find($mesinId);
+
+    //     // Pastikan mesin ditemukan
+    //     if (!$mesin) {
+    //         return 'Invalid Mesin'; // Fallback jika mesin tidak ditemukan
+    //     }
+
+    //     // Ambil nama_plant dan nama_mesin dari mesin
+    //     $plantCode = $mesin->nama_plant; // Nama plant dari mesin
+    //     $mesinCode = $mesin->nama_mesin; // Nama mesin dari mesin
+
+    //     // Ambil tanggal hari ini
+    //     $today = now()->format('y');
+
+    //     // Ambil nomor urut terakhir untuk hari ini berdasarkan mesin
+    //     $lastReport = Laporan::whereDate('created_at', now()->toDateString())
+    //         ->where('mesin_id', $mesinId)
+    //         ->latest('id')
+    //         ->first();
+
+    //     // Tentukan nomor urut untuk laporan baru
+    //     $urut = $lastReport ? str_pad((int) substr($lastReport->kode_laporan, -3) + 1, 3, '0', STR_PAD_LEFT) : '001';
+
+    //     // Gabungkan menjadi kode laporan
+    //     return "{$plantCode}{$today}{$mesinCode}{$urut}";
+    // }
 }

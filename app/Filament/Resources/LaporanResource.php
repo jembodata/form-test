@@ -383,8 +383,7 @@ class LaporanResource extends Resource
                 //         'Ada' => 'danger',
                 //     })
                 //     ->searchable(),
-                Tables\Columns\TextColumn::make('shift')
-                    ->searchable(),
+                Tables\Columns\TextColumn::make('shift'),
                 Tables\Columns\TextColumn::make('mesins.nama_mesin')
                     ->label('Nama Mesin')
                     ->searchable(),
@@ -419,6 +418,12 @@ class LaporanResource extends Resource
             ->defaultPaginationPageOption(25)
             ->filters([
                 //
+                Tables\Filters\SelectFilter::make('shift')
+                    ->options([
+                        '1' => 'Shift 1',
+                        '2' => 'Shift 2',
+                        '3' => 'Shift 3',
+                    ]),
             ])
             ->headerActions([
                 // Tables\Actions\ExportAction::make()
