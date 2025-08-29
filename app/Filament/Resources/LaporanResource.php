@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Actions\Exports\Enums\ExportFormat;
+use RuntimeException;
 
 class LaporanResource extends Resource
 {
@@ -365,7 +366,7 @@ class LaporanResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('dibuat pada')
-                    ->date(),
+                    ->dateTime(),
                 Tables\Columns\TextColumn::make('kode_laporan')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('karyawans.nama')
@@ -476,210 +477,211 @@ class LaporanResource extends Resource
             ->actions([
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\ViewAction::make(),
-                    Tables\Actions\EditAction::make()
-                        ->form([
-                            Forms\Components\Grid::make(4)
-                                ->schema([
-                                    Forms\Components\Fieldset::make('Label')
-                                        ->label('Production Details')
-                                        ->schema([
-                                            Forms\Components\Repeater::make('detail_produksi')
-                                                ->schema([
-                                                    Forms\Components\Section::make([
-                                                        Forms\Components\TextInput::make('persiapan')
-                                                            ->label('Persiapan')
-                                                            ->placeholder('0')
-                                                            // ->default('0')
-                                                            ->numeric()
-                                                            ->suffix('Jam')
-                                                            ->live()
-                                                            ->minValue(0)
-                                                            ->maxValue(12)
-                                                            ->live(debounce: 500)
-                                                            ->afterStateUpdated(function ($livewire, Forms\Components\TextInput $component) {
-                                                                $livewire->validateOnly($component->getStatePath());
-                                                            }),
-                                                        Forms\Components\TextInput::make('operation')
-                                                            ->label('Operation')
-                                                            ->placeholder('0')
-                                                            // ->default('0')
-                                                            ->numeric()
-                                                            ->suffix('Jam')
-                                                            ->minValue(0)
-                                                            ->maxValue(12)
-                                                            ->live(debounce: 500)
-                                                            ->afterStateUpdated(function ($livewire, Forms\Components\TextInput $component) {
-                                                                $livewire->validateOnly($component->getStatePath());
-                                                            }),
-                                                        Forms\Components\TextInput::make('reloading')
-                                                            ->label('Reloading')
-                                                            ->placeholder('0')
-                                                            // ->default('0')
-                                                            ->numeric()
-                                                            ->suffix('Jam')
-                                                            ->minValue(0)
-                                                            ->maxValue(12)
-                                                            ->live(debounce: 500)
-                                                            ->afterStateUpdated(function ($livewire, Forms\Components\TextInput $component) {
-                                                                $livewire->validateOnly($component->getStatePath());
-                                                            }),
-                                                        Forms\Components\TextInput::make('gangguan')
-                                                            ->label('Gangguan')
-                                                            ->placeholder('0')
-                                                            // ->default('0')
-                                                            ->numeric()
-                                                            ->suffix('Jam')
-                                                            ->minValue(0)
-                                                            ->maxValue(12)
-                                                            ->live(debounce: 500)
-                                                            ->afterStateUpdated(function ($livewire, Forms\Components\TextInput $component) {
-                                                                $livewire->validateOnly($component->getStatePath());
-                                                            }),
-                                                    ])
-                                                        ->description('Mohon Teliti dan isi dengan benar')
-                                                        ->columns(4),
-                                                    Forms\Components\Section::make('')
-                                                        ->description('Mohon Teliti dan isi dengan benar')
-                                                        ->columns(3)
-                                                        ->schema([
-                                                            Forms\Components\TextInput::make('customers')
-                                                                ->placeholder('input nama pelanggan')
-                                                                ->label('Customers')
-                                                                ->extraInputAttributes(['onInput' => 'this.value = this.value.toUpperCase()'])
-                                                                ->required(),
-                                                            Forms\Components\Select::make('proses')
-                                                                ->placeholder('input nama proses')
-                                                                ->label('Proses')
-                                                                ->searchable()
-                                                                ->required()
-                                                                ->options([
-                                                                    'Coloring' => 'Coloring',
-                                                                    'Tubing' => 'Tubing',
-                                                                    'Outer Sheath' => 'Outer Sheath',
-                                                                    'Drop Cable' => 'Drop Cable',
-                                                                    'Inner Sheath' => 'Inner Sheath',
-                                                                    'Stranding' => 'Stranding',
-                                                                    'Armour' => 'Armour',
-                                                                    'Wrapping' => 'Wrapping',
-                                                                    'Insulation' => 'Insulation',
-                                                                    'Screen' => 'Screen',
-                                                                    'Taping' => 'Taping',
-                                                                    'Armouring' => 'Armouring',
-                                                                    'Rewind' => 'Rewind',
-                                                                    'Repair' => 'Repair',
-                                                                    'Inner Sheathing' => 'Inner Sheathing',
-                                                                    'Separation Sheathing' => 'Separation Sheathing',
-                                                                    'Outersheathing' => 'Outersheathing',
-                                                                    'Tin' => 'Tin',
-                                                                    'Micatape' => 'Micatape',
-                                                                    'Twist' => 'Twist',
-                                                                    'Cabling' => 'Cabling',
-                                                                    'Inner' => 'Inner',
-                                                                    'Braiding' => 'Braiding',
-                                                                    'Outer' => 'Outer',
-                                                                    'Rewind Marking' => 'Rewind Marking',
-                                                                    'Drawing' => 'Drawing',
-                                                                    'Bunching' => 'Bunching',
-                                                                    'Insul' => 'Insul',
-                                                                    'Coiling' => 'Coiling',
-                                                                ])
-                                                                ->native(false),
-                                                            Forms\Components\TextInput::make('op')
-                                                                ->label('No OP')
-                                                                ->placeholder('input nomor OP')
-                                                                ->extraInputAttributes(['onInput' => 'this.value = this.value.toUpperCase()'])
-                                                                ->maxLength(10)
-                                                                ->required()
-                                                                ->live(debounce: 500)
-                                                                ->afterStateUpdated(function ($livewire, Forms\Components\TextInput $component) {
-                                                                    $livewire->validateOnly($component->getStatePath());
-                                                                }),
-                                                            Forms\Components\TextInput::make('type_size')
-                                                                ->placeholder('input Type & Size')
-                                                                ->label('Type & Size')
-                                                                ->extraInputAttributes(['onInput' => 'this.value = this.value.toUpperCase()'])
-                                                                ->required(),
-                                                            Forms\Components\TextInput::make('ouput_per_order')
-                                                                ->label('Output')
-                                                                ->mask(RawJs::make('$money($input)'))
-                                                                ->stripCharacters(',')
-                                                                ->placeholder('input dalam angka')
-                                                                ->numeric()
-                                                                ->inputMode('decimal')
-                                                                ->suffix('Meter')
-                                                                ->required(),
-                                                            Forms\Components\TextInput::make('line_speed')
-                                                                ->label('Line Speed')
-                                                                ->placeholder('0')
-                                                                ->numeric()
-                                                                ->minValue(0)
-                                                                ->live(debounce: 500)
-                                                                ->afterStateUpdated(function ($livewire, Forms\Components\TextInput $component) {
-                                                                    $livewire->validateOnly($component->getStatePath());
-                                                                }),
-                                                        ]),
-                                                    Forms\Components\Section::make('Kendala & Keterangan')
-                                                        ->description('Isi jika ada, Mohon Teliti dan isi dengan benar')
-                                                        ->collapsed()
-                                                        ->columns(2)
-                                                        ->schema([
-                                                            Forms\Components\CheckboxList::make('kendala')
-                                                                ->label('Kendala')
-                                                                ->options([
-                                                                    'TOP' => 'TOP',
-                                                                    'GO' => 'GO',
-                                                                    'TBP' => 'TBP',
-                                                                    'TBK' => 'TBK',
-                                                                    'TPS' => 'TPS',
-                                                                    'MR' => 'MR',
-                                                                    'TAT' => 'TAT',
-                                                                    'TAO' => 'TAO',
-                                                                    'TB' => 'TB',
-                                                                    'CO' => 'CO',
-                                                                    'lain' => 'Lainnya',
-                                                                ])
-                                                                ->columns(2)
-                                                                ->gridDirection('row')
-                                                                ->rules([
-                                                                    function () {
-                                                                        return function (string $attribute, $value, $fail) {
-                                                                            if (count($value) > 3) {
-                                                                                $fail("Kendala tidak boleh lebih dari 3 pilihan.");
-                                                                            }
-                                                                        };
-                                                                    },
-                                                                ])
-                                                                ->live(debounce: 500)
-                                                                ->afterStateUpdated(function ($livewire, Forms\Components\CheckboxList $component) {
-                                                                    $livewire->validateOnly($component->getStatePath());
-                                                                }),
-                                                            Forms\Components\Textarea::make('keterangan')
-                                                                ->label('Keterangan')
-                                                                ->rows(9)
-                                                                ->cols(10)
-                                                                ->disableGrammarly(),
-                                                        ]),
-                                                ])
-                                                ->collapsed()
-                                                ->cloneable()
-                                                ->deleteAction(
-                                                    fn(\Filament\Forms\Components\Actions\Action $action) => $action->requiresConfirmation(),
-                                                )
-                                                ->maxItems(5)
-                                                ->columns(2)
-                                                // ->itemLabel(function (array $state, $component): ?string {
+                    Tables\Actions\EditAction::make(),
+                    // Tables\Actions\EditAction::make()
+                    //     ->form([
+                    //         Forms\Components\Grid::make(4)
+                    //             ->schema([
+                    //                 Forms\Components\Fieldset::make('Label')
+                    //                     ->label('Production Details')
+                    //                     ->schema([
+                    //                         Forms\Components\Repeater::make('detail_produksi')
+                    //                             ->schema([
+                    //                                 Forms\Components\Section::make([
+                    //                                     Forms\Components\TextInput::make('persiapan')
+                    //                                         ->label('Persiapan')
+                    //                                         ->placeholder('0')
+                    //                                         // ->default('0')
+                    //                                         ->numeric()
+                    //                                         ->suffix('Jam')
+                    //                                         ->live()
+                    //                                         ->minValue(0)
+                    //                                         ->maxValue(12)
+                    //                                         ->live(debounce: 500)
+                    //                                         ->afterStateUpdated(function ($livewire, Forms\Components\TextInput $component) {
+                    //                                             $livewire->validateOnly($component->getStatePath());
+                    //                                         }),
+                    //                                     Forms\Components\TextInput::make('operation')
+                    //                                         ->label('Operation')
+                    //                                         ->placeholder('0')
+                    //                                         // ->default('0')
+                    //                                         ->numeric()
+                    //                                         ->suffix('Jam')
+                    //                                         ->minValue(0)
+                    //                                         ->maxValue(12)
+                    //                                         ->live(debounce: 500)
+                    //                                         ->afterStateUpdated(function ($livewire, Forms\Components\TextInput $component) {
+                    //                                             $livewire->validateOnly($component->getStatePath());
+                    //                                         }),
+                    //                                     Forms\Components\TextInput::make('reloading')
+                    //                                         ->label('Reloading')
+                    //                                         ->placeholder('0')
+                    //                                         // ->default('0')
+                    //                                         ->numeric()
+                    //                                         ->suffix('Jam')
+                    //                                         ->minValue(0)
+                    //                                         ->maxValue(12)
+                    //                                         ->live(debounce: 500)
+                    //                                         ->afterStateUpdated(function ($livewire, Forms\Components\TextInput $component) {
+                    //                                             $livewire->validateOnly($component->getStatePath());
+                    //                                         }),
+                    //                                     Forms\Components\TextInput::make('gangguan')
+                    //                                         ->label('Gangguan')
+                    //                                         ->placeholder('0')
+                    //                                         // ->default('0')
+                    //                                         ->numeric()
+                    //                                         ->suffix('Jam')
+                    //                                         ->minValue(0)
+                    //                                         ->maxValue(12)
+                    //                                         ->live(debounce: 500)
+                    //                                         ->afterStateUpdated(function ($livewire, Forms\Components\TextInput $component) {
+                    //                                             $livewire->validateOnly($component->getStatePath());
+                    //                                         }),
+                    //                                 ])
+                    //                                     ->description('Mohon Teliti dan isi dengan benar')
+                    //                                     ->columns(4),
+                    //                                 Forms\Components\Section::make('')
+                    //                                     ->description('Mohon Teliti dan isi dengan benar')
+                    //                                     ->columns(3)
+                    //                                     ->schema([
+                    //                                         Forms\Components\TextInput::make('customers')
+                    //                                             ->placeholder('input nama pelanggan')
+                    //                                             ->label('Customers')
+                    //                                             ->extraInputAttributes(['onInput' => 'this.value = this.value.toUpperCase()'])
+                    //                                             ->required(),
+                    //                                         Forms\Components\Select::make('proses')
+                    //                                             ->placeholder('input nama proses')
+                    //                                             ->label('Proses')
+                    //                                             ->searchable()
+                    //                                             ->required()
+                    //                                             ->options([
+                    //                                                 'Coloring' => 'Coloring',
+                    //                                                 'Tubing' => 'Tubing',
+                    //                                                 'Outer Sheath' => 'Outer Sheath',
+                    //                                                 'Drop Cable' => 'Drop Cable',
+                    //                                                 'Inner Sheath' => 'Inner Sheath',
+                    //                                                 'Stranding' => 'Stranding',
+                    //                                                 'Armour' => 'Armour',
+                    //                                                 'Wrapping' => 'Wrapping',
+                    //                                                 'Insulation' => 'Insulation',
+                    //                                                 'Screen' => 'Screen',
+                    //                                                 'Taping' => 'Taping',
+                    //                                                 'Armouring' => 'Armouring',
+                    //                                                 'Rewind' => 'Rewind',
+                    //                                                 'Repair' => 'Repair',
+                    //                                                 'Inner Sheathing' => 'Inner Sheathing',
+                    //                                                 'Separation Sheathing' => 'Separation Sheathing',
+                    //                                                 'Outersheathing' => 'Outersheathing',
+                    //                                                 'Tin' => 'Tin',
+                    //                                                 'Micatape' => 'Micatape',
+                    //                                                 'Twist' => 'Twist',
+                    //                                                 'Cabling' => 'Cabling',
+                    //                                                 'Inner' => 'Inner',
+                    //                                                 'Braiding' => 'Braiding',
+                    //                                                 'Outer' => 'Outer',
+                    //                                                 'Rewind Marking' => 'Rewind Marking',
+                    //                                                 'Drawing' => 'Drawing',
+                    //                                                 'Bunching' => 'Bunching',
+                    //                                                 'Insul' => 'Insul',
+                    //                                                 'Coiling' => 'Coiling',
+                    //                                             ])
+                    //                                             ->native(false),
+                    //                                         Forms\Components\TextInput::make('op')
+                    //                                             ->label('No OP')
+                    //                                             ->placeholder('input nomor OP')
+                    //                                             ->extraInputAttributes(['onInput' => 'this.value = this.value.toUpperCase()'])
+                    //                                             ->maxLength(10)
+                    //                                             ->required()
+                    //                                             ->live(debounce: 500)
+                    //                                             ->afterStateUpdated(function ($livewire, Forms\Components\TextInput $component) {
+                    //                                                 $livewire->validateOnly($component->getStatePath());
+                    //                                             }),
+                    //                                         Forms\Components\TextInput::make('type_size')
+                    //                                             ->placeholder('input Type & Size')
+                    //                                             ->label('Type & Size')
+                    //                                             ->extraInputAttributes(['onInput' => 'this.value = this.value.toUpperCase()'])
+                    //                                             ->required(),
+                    //                                         Forms\Components\TextInput::make('ouput_per_order')
+                    //                                             ->label('Output')
+                    //                                             ->mask(RawJs::make('$money($input)'))
+                    //                                             ->stripCharacters(',')
+                    //                                             ->placeholder('input dalam angka')
+                    //                                             ->numeric()
+                    //                                             ->inputMode('decimal')
+                    //                                             ->suffix('Meter')
+                    //                                             ->required(),
+                    //                                         Forms\Components\TextInput::make('line_speed')
+                    //                                             ->label('Line Speed')
+                    //                                             ->placeholder('0')
+                    //                                             ->numeric()
+                    //                                             ->minValue(0)
+                    //                                             ->live(debounce: 500)
+                    //                                             ->afterStateUpdated(function ($livewire, Forms\Components\TextInput $component) {
+                    //                                                 $livewire->validateOnly($component->getStatePath());
+                    //                                             }),
+                    //                                     ]),
+                    //                                 Forms\Components\Section::make('Kendala & Keterangan')
+                    //                                     ->description('Isi jika ada, Mohon Teliti dan isi dengan benar')
+                    //                                     ->collapsed()
+                    //                                     ->columns(2)
+                    //                                     ->schema([
+                    //                                         Forms\Components\CheckboxList::make('kendala')
+                    //                                             ->label('Kendala')
+                    //                                             ->options([
+                    //                                                 'TOP' => 'TOP',
+                    //                                                 'GO' => 'GO',
+                    //                                                 'TBP' => 'TBP',
+                    //                                                 'TBK' => 'TBK',
+                    //                                                 'TPS' => 'TPS',
+                    //                                                 'MR' => 'MR',
+                    //                                                 'TAT' => 'TAT',
+                    //                                                 'TAO' => 'TAO',
+                    //                                                 'TB' => 'TB',
+                    //                                                 'CO' => 'CO',
+                    //                                                 'lain' => 'Lainnya',
+                    //                                             ])
+                    //                                             ->columns(2)
+                    //                                             ->gridDirection('row')
+                    //                                             ->rules([
+                    //                                                 function () {
+                    //                                                     return function (string $attribute, $value, $fail) {
+                    //                                                         if (count($value) > 3) {
+                    //                                                             $fail("Kendala tidak boleh lebih dari 3 pilihan.");
+                    //                                                         }
+                    //                                                     };
+                    //                                                 },
+                    //                                             ])
+                    //                                             ->live(debounce: 500)
+                    //                                             ->afterStateUpdated(function ($livewire, Forms\Components\CheckboxList $component) {
+                    //                                                 $livewire->validateOnly($component->getStatePath());
+                    //                                             }),
+                    //                                         Forms\Components\Textarea::make('keterangan')
+                    //                                             ->label('Keterangan')
+                    //                                             ->rows(9)
+                    //                                             ->cols(10)
+                    //                                             ->disableGrammarly(),
+                    //                                     ]),
+                    //                             ])
+                    //                             ->collapsed()
+                    //                             ->cloneable()
+                    //                             ->deleteAction(
+                    //                                 fn(\Filament\Forms\Components\Actions\Action $action) => $action->requiresConfirmation(),
+                    //                             )
+                    //                             ->maxItems(5)
+                    //                             ->columns(2)
+                    //                             // ->itemLabel(function (array $state, $component): ?string {
 
-                                                //     $key = array_search($state, $component->getState());
-                                                //     $index = array_search($key, array_keys($component->getState()));
+                    //                             //     $key = array_search($state, $component->getState());
+                    //                             //     $index = array_search($key, array_keys($component->getState()));
 
-                                                //     return $index + 1;
-                                                // }),
-                                                ->itemLabel(fn() => __('Data') . ' ' . ++self::$indexRepeater)
-                                                ->addActionLabel('Tambah Detail Produksi')
-                                        ])
-                                        ->columns(1),
-                                ]),
-                        ])
+                    //                             //     return $index + 1;
+                    //                             // }),
+                    //                             ->itemLabel(fn() => __('Data') . ' ' . ++self::$indexRepeater)
+                    //                             ->addActionLabel('Tambah Detail Produksi')
+                    //                     ])
+                    //                     ->columns(1),
+                    //             ]),
+                    //     ])
                 ]),
 
 
@@ -756,33 +758,72 @@ class LaporanResource extends Resource
         ];
     }
 
-    public static function generateKodeLaporan($mesinId)
+    public static function generateKodeLaporan($mesinId): string
     {
-        // Ambil mesin berdasarkan mesin_id
         $mesin = Mesin::find($mesinId);
+        if (!$mesin) return 'Invalid Mesin';
 
-        // Pastikan mesin ditemukan
-        if (!$mesin) {
-            return 'Invalid Mesin'; // Fallback jika mesin tidak ditemukan
-        }
+        $plantCode = trim($mesin->nama_plant);
+        $mesinCode = trim($mesin->nama_mesin);
+        $yy        = now()->format('y');
 
-        // Ambil nama_plant dan nama_mesin dari mesin
-        $plantCode = $mesin->nama_plant; // Nama plant dari mesin
-        $mesinCode = $mesin->nama_mesin; // Nama mesin dari mesin
+        $width  = 5;                              // 5 digit
+        $prefix = "{$plantCode}{$yy}{$mesinCode}-"; // contoh: A25AW-1-
 
-        // Ambil tanggal hari ini
-        $today = now()->format('Ymd');
+        // Hanya ambil yang panjangnya pas: prefix + 5 char
+        $likeFixed = $prefix . str_repeat('_', $width);
 
-        // Ambil nomor urut terakhir untuk hari ini berdasarkan mesin
-        $lastReport = Laporan::whereDate('created_at', now()->toDateString())
-            ->where('mesin_id', $mesinId)
-            ->latest('id')
+        // Ambil last berbasis angka suffix (MySQL)
+        $last = Laporan::where('kode_laporan', 'like', $likeFixed)
+            ->orderByRaw('CAST(RIGHT(kode_laporan, ?) AS UNSIGNED) DESC', [$width])
             ->first();
 
-        // Tentukan nomor urut untuk laporan baru
-        $urut = $lastReport ? str_pad((int) substr($lastReport->kode_laporan, -3) + 1, 3, '0', STR_PAD_LEFT) : '001';
+        $pattern = '/^' . preg_quote($prefix, '/') . '(\d{' . $width . '})$/';
 
-        // Gabungkan menjadi kode laporan
-        return "{$plantCode}-{$today}-{$mesinCode}-{$urut}";
+        $next = 1;
+        if ($last && preg_match($pattern, trim($last->kode_laporan), $m)) {
+            $next = (int) $m[1] + 1;
+        }
+
+        $max = (10 ** $width) - 1; // 99999
+        if ($next > $max) {
+            // ganti sesuai kebijakanmu: ValidationException/notify Filament/return null
+            throw new RuntimeException('Nomor urut sudah mencapai ' . $max . ' untuk tahun ini.');
+        }
+
+        return $prefix . str_pad((string) $next, $width, '0', STR_PAD_LEFT);
     }
+
+
+
+    // public static function generateKodeLaporan($mesinId)
+    // {
+    //     $mesin = Mesin::find($mesinId);
+    //     if (!$mesin) return 'Invalid Mesin';
+
+    //     $plantCode = $mesin->nama_plant;   // contoh: "A"
+    //     $mesinCode = $mesin->nama_mesin;   // contoh: "EX-70/40"
+    //     $yy        = now()->format('y');   // "25" untuk 2025
+
+    //     // Prefix bawa plant + tahun 2 digit + nama mesin, dan tambahkan '-' agar angka tidak nempel ke "40"
+    //     $prefix = "{$plantCode}{$yy}{$mesinCode}-"; // contoh: "A25EX-70/40-"
+
+    //     // Cari kode terakhir untuk prefix tsb (otomatis reset tiap tahun karena YY beda)
+    //     $last = Laporan::where('kode_laporan', 'like', $prefix . '%')
+    //         ->orderBy('kode_laporan', 'desc')
+    //         ->first();
+
+    //     // Ambil tepat 3 digit setelah prefix
+    //     $next = 1;
+    //     if ($last && preg_match('/^' . preg_quote($prefix, '/') . '(\d{3})$/', $last->kode_laporan, $m)) {
+    //         $next = (int)$m[1] + 1;
+    //     }
+
+    //     if ($next > 999) {
+    //         // kalau mau, ganti jadi return atau log error sesuai kebutuhanmu
+    //         throw new RuntimeException('Nomor urut sudah mencapai 999 untuk tahun ini.');
+    //     }
+
+    //     return $prefix . str_pad($next, 3, '0', STR_PAD_LEFT);
+    // }
 }

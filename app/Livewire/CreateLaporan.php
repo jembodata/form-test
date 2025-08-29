@@ -17,6 +17,7 @@ use Filament\Notifications\Notification;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
+use RuntimeException;
 
 class CreateLaporan extends Component implements HasForms, HasActions
 {
@@ -497,29 +498,73 @@ class CreateLaporan extends Component implements HasForms, HasActions
         return view('livewire.create-laporan');
     }
 
-    public static function generateKodeLaporan($mesinId)
+    public static function generateKodeLaporan($mesinId): string
     {
         $mesin = Mesin::find($mesinId);
         if (!$mesin) return 'Invalid Mesin';
 
-        $plantCode = $mesin->nama_plant;
-        $mesinCode = $mesin->nama_mesin;
+        $plantCode = trim($mesin->nama_plant);
+        $mesinCode = trim($mesin->nama_mesin);
+        $yy        = now()->format('y');
 
-        // SERTAKAN tanggal penuh di KODE (bukan cuma year 2 digit)
-        $ymd = now()->format('y');
-        $prefix = "{$plantCode}{$ymd}{$mesinCode}";
+        $width  = 5;                              // 5 digit
+        $prefix = "{$plantCode}{$yy}{$mesinCode}-"; // contoh: A25AW-1-
 
-        // Cari LAST berdasarkan prefix (jangan filter by today lagi, prefix sudah bawa tanggal)
-        $last = Laporan::where('kode_laporan', 'like', $prefix . '%')
-            ->orderByDesc('kode_laporan')
+        // Hanya ambil yang panjangnya pas: prefix + 5 char
+        $likeFixed = $prefix . str_repeat('_', $width);
+
+        // Ambil last berbasis angka suffix (MySQL)
+        $last = Laporan::where('kode_laporan', 'like', $likeFixed)
+            ->orderByRaw('CAST(RIGHT(kode_laporan, ?) AS UNSIGNED) DESC', [$width])
             ->first();
 
-        $urut = $last && preg_match('/(\d+)$/', $last->kode_laporan, $m)
-            ? str_pad(((int)$m[1]) + 1, 3, '0', STR_PAD_LEFT)
-            : '001';
+        $pattern = '/^' . preg_quote($prefix, '/') . '(\d{' . $width . '})$/';
 
-        return $prefix . $urut;
+        $next = 1;
+        if ($last && preg_match($pattern, trim($last->kode_laporan), $m)) {
+            $next = (int) $m[1] + 1;
+        }
+
+        $max = (10 ** $width) - 1; // 99999
+        if ($next > $max) {
+            // ganti sesuai kebijakanmu: ValidationException/notify Filament/return null
+            throw new RuntimeException('Nomor urut sudah mencapai ' . $max . ' untuk tahun ini.');
+        }
+
+        return $prefix . str_pad((string) $next, $width, '0', STR_PAD_LEFT);
     }
+
+    // public static function generateKodeLaporan($mesinId)
+    // {
+    //     $mesin = Mesin::find($mesinId);
+    //     if (!$mesin) return 'Invalid Mesin';
+
+    //     $plantCode = $mesin->nama_plant;   // contoh: "A"
+    //     $mesinCode = $mesin->nama_mesin;   // contoh: "EX-70/40"
+    //     $yy        = now()->format('y');   // "25" untuk 2025
+
+    //     // Prefix bawa plant + tahun 2 digit + nama mesin, dan tambahkan '-' agar angka tidak nempel ke "40"
+    //     $prefix = "{$plantCode}{$yy}{$mesinCode}-"; // contoh: "A25EX-70/40-"
+
+    //     // Cari kode terakhir untuk prefix tsb (otomatis reset tiap tahun karena YY beda)
+    //     $last = Laporan::where('kode_laporan', 'like', $prefix . '%')
+    //         ->orderBy('kode_laporan', 'desc')
+    //         ->first();
+
+    //     // Ambil tepat 3 digit setelah prefix
+    //     $next = 1;
+    //     if ($last && preg_match('/^' . preg_quote($prefix, '/') . '(\d{3})$/', $last->kode_laporan, $m)) {
+    //         $next = (int)$m[1] + 1;
+    //     }
+
+    //     if ($next > 999) {
+    //         // kalau mau, ganti jadi return atau log error sesuai kebutuhanmu
+    //         throw new RuntimeException('Nomor urut sudah mencapai 999 untuk tahun ini.');
+    //     }
+
+    //     return $prefix . str_pad($next, 3, '0', STR_PAD_LEFT);
+    // }
+
 
 
     // public static function generateKodeLaporan($mesinId)
