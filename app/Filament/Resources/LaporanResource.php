@@ -259,6 +259,8 @@ class LaporanResource extends Resource
                                                         'Bunching' => 'Bunching',
                                                         'Insul' => 'Insul',
                                                         'Coiling' => 'Coiling',
+                                                        'Inner + Outer + Autocoiler' => 'Inner + Outer + Autocoiler',
+                                                        'Insul + Autocoiler' => 'Insul + Autocoiler',
                                                     ])
                                                     ->native(false),
                                                 Forms\Components\TextInput::make('op')

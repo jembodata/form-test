@@ -61,10 +61,10 @@ class CreateLaporan extends Component implements HasForms, HasActions
                         //     ->required(),
                         Forms\Components\Select::make('karyawans')
                             ->label('NIK')
+                            ->hint('Max 3 NIK')
                             ->relationship('karyawans', 'nik')
                             ->multiple()
                             ->searchable()
-                            ->hint('Max 3 NIK')
                             ->required()
                             ->preload()
                             ->maxItems(3),
@@ -147,14 +147,16 @@ class CreateLaporan extends Component implements HasForms, HasActions
                             ->mask(RawJs::make('$money($input)'))
                             ->stripCharacters(',')
                             ->numeric()
-                            ->inputMode('decimal'),
+                            ->inputMode('decimal')
+                            ->rules(['lte:hour_meter_akhir']), // <= dari hour_meter_akhir,
                         Forms\Components\TextInput::make('hour_meter_akhir')
                             ->placeholder('input Hour Meter Akhir')
                             ->required()
                             ->mask(RawJs::make('$money($input)'))
                             ->stripCharacters(',')
                             ->numeric()
-                            ->inputMode('decimal'),
+                            ->inputMode('decimal')
+                            ->rules(['gte:hour_meter_awal']), // >= dari hour_meter_awal,
                     ])
                     ->columns(3),
 
@@ -164,6 +166,7 @@ class CreateLaporan extends Component implements HasForms, HasActions
                             ->label('Production Details')
                             ->schema([
                                 Forms\Components\Repeater::make('detail_produksi')
+                                    ->hint('Anda bisa menambahkan hingga 5 detail produksi dalam satu laporan.')
                                     ->schema([
                                         Forms\Components\Section::make([
                                             Forms\Components\TextInput::make('persiapan')
@@ -262,7 +265,8 @@ class CreateLaporan extends Component implements HasForms, HasActions
                                                         'Drawing' => 'Drawing',
                                                         'Bunching' => 'Bunching',
                                                         'Insul' => 'Insul',
-                                                        'Coiling' => 'Coiling',
+                                                        'Inner + Outer + Autocoiler' => 'Inner + Outer + Autocoiler',
+                                                        'Insul + Autocoiler' => 'Insul + Autocoiler',
                                                     ])
                                                     ->native(false),
                                                 Forms\Components\TextInput::make('op')

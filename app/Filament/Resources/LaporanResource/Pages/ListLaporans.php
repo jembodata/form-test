@@ -4,6 +4,7 @@ namespace App\Filament\Resources\LaporanResource\Pages;
 
 
 use App\Filament\Resources\LaporanResource;
+use App\Models\Laporan;
 use App\Models\Mesin;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Actions;
@@ -29,7 +30,16 @@ class ListLaporans extends ListRecords
                         ->schema([
                             Forms\Components\Select::make('mesin_id')
                                 ->label('Pilih Mesin')
-                                ->options(Mesin::all()->pluck('nama_mesin', 'id'))
+                                // ->options(Mesin::all()->pluck('nama_mesin', 'id'))
+                                ->options(
+                                    Laporan::query()
+                                        ->with('mesins:id,nama_mesin')
+                                        ->select('mesin_id')
+                                        ->distinct()
+                                        ->get()
+                                        ->pluck('mesins.nama_mesin', 'mesin_id')
+                                        ->toArray()
+                                )
                                 ->searchable()
                                 ->required(),
                             Forms\Components\TextInput::make('month')
