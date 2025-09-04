@@ -148,7 +148,9 @@ class CreateLaporan extends Component implements HasForms, HasActions
                             ->stripCharacters(',')
                             ->numeric()
                             ->inputMode('decimal')
-                            ->rules(['lte:hour_meter_akhir']), // <= dari hour_meter_akhir,
+                            ->stripCharacters(['.', ',', ' ', "\u{00A0}"])
+                            ->reactive()
+                            ->maxValue(fn (Get $get) => (int) preg_replace('/\D+/', '', (string) $get('hour_meter_akhir'))),
                         Forms\Components\TextInput::make('hour_meter_akhir')
                             ->placeholder('input Hour Meter Akhir')
                             ->required()
@@ -156,7 +158,9 @@ class CreateLaporan extends Component implements HasForms, HasActions
                             ->stripCharacters(',')
                             ->numeric()
                             ->inputMode('decimal')
-                            ->rules(['gte:hour_meter_awal']), // >= dari hour_meter_awal,
+                            ->stripCharacters(['.', ',', ' ', "\u{00A0}"])
+                            ->reactive()
+                            ->minValue(fn (Get $get) => (int) preg_replace('/\D+/', '', (string) $get('hour_meter_awal'))),
                     ])
                     ->columns(3),
 
