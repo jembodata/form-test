@@ -147,10 +147,19 @@ class CreateLaporan extends Component implements HasForms, HasActions
                             ->mask(RawJs::make('$money($input)'))
                             ->stripCharacters(',')
                             ->numeric()
-                            ->inputMode('decimal')
-                            ->stripCharacters(['.', ',', ' ', "\u{00A0}"])
-                            ->reactive()
-                            ->maxValue(fn (Get $get) => (int) preg_replace('/\D+/', '', (string) $get('hour_meter_akhir'))),
+                            ->inputMode('decimal'),
+                            // ->stripCharacters(['.', ',', ' ', "\u{00A0}"])
+                            // ->live(debounce: 1000)
+                            // ->reactive()
+                            // ->maxValue(fn (Get $get) => (int) preg_replace('/\D+/', '', (string) $get('hour_meter_akhir')))
+                            // ->maxValue(function (Get $get) {
+                            //     $raw = (string) $get('hour_meter_akhir');
+                            //     $digits = preg_replace('/\D+/', '', $raw ?? '');
+                            //     return $digits !== '' ? (int) $digits : null; // <- penting
+                            // })
+                            // ->afterStateUpdated(function ($livewire, Forms\Components\TextInput $component) {
+                            //     $livewire->validateOnly($component->getStatePath());
+                            // }),
                         Forms\Components\TextInput::make('hour_meter_akhir')
                             ->placeholder('input Hour Meter Akhir')
                             ->required()
@@ -158,9 +167,13 @@ class CreateLaporan extends Component implements HasForms, HasActions
                             ->stripCharacters(',')
                             ->numeric()
                             ->inputMode('decimal')
-                            ->stripCharacters(['.', ',', ' ', "\u{00A0}"])
+                            // ->stripCharacters(['.', ',', ' ', "\u{00A0}"])
+                            ->live(debounce: 700)
                             ->reactive()
-                            ->minValue(fn (Get $get) => (int) preg_replace('/\D+/', '', (string) $get('hour_meter_awal'))),
+                            ->minValue(fn (Get $get) => (int) preg_replace('/\D+/', '', (string) $get('hour_meter_awal')))
+                            ->afterStateUpdated(function ($livewire, Forms\Components\TextInput $component) {
+                                $livewire->validateOnly($component->getStatePath());
+                            }),
                     ])
                     ->columns(3),
 
@@ -176,6 +189,7 @@ class CreateLaporan extends Component implements HasForms, HasActions
                                             Forms\Components\TextInput::make('persiapan')
                                                 ->label('Persiapan')
                                                 ->placeholder('0')
+                                                ->required()
                                                 // ->default('0')
                                                 ->numeric()
                                                 ->suffix('Jam')
@@ -189,6 +203,7 @@ class CreateLaporan extends Component implements HasForms, HasActions
                                             Forms\Components\TextInput::make('operation')
                                                 ->label('Operation')
                                                 ->placeholder('0')
+                                                ->required()
                                                 // ->default('0')
                                                 ->numeric()
                                                 ->suffix('Jam')
@@ -201,6 +216,7 @@ class CreateLaporan extends Component implements HasForms, HasActions
                                             Forms\Components\TextInput::make('reloading')
                                                 ->label('Reloading')
                                                 ->placeholder('0')
+                                                ->required()
                                                 // ->default('0')
                                                 ->numeric()
                                                 ->suffix('Jam')
@@ -213,6 +229,7 @@ class CreateLaporan extends Component implements HasForms, HasActions
                                             Forms\Components\TextInput::make('gangguan')
                                                 ->label('Gangguan')
                                                 ->placeholder('0')
+                                                ->required()
                                                 // ->default('0')
                                                 ->numeric()
                                                 ->suffix('Jam')
@@ -223,7 +240,7 @@ class CreateLaporan extends Component implements HasForms, HasActions
                                                     $livewire->validateOnly($component->getStatePath());
                                                 }),
                                         ])
-                                            ->description('Mohon Teliti dan isi dengan benar')
+                                            ->description('Mohon Teliti dan isi dengan benar, isi 0 jika tidak ada')
                                             ->columns(4),
                                         Forms\Components\Section::make('')
                                             ->description('Mohon Teliti dan isi dengan benar')
@@ -370,6 +387,7 @@ class CreateLaporan extends Component implements HasForms, HasActions
                                     //     return $index + 1;
                                     // }),
                                     ->itemLabel(fn() => __('Data') . ' ' . ++self::$indexRepeater)
+                                    ->reorderable(false)
                                     ->addActionLabel('Tambah Detail Produksi')
                             ])
                             ->columns(1),
