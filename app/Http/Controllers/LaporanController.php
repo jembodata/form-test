@@ -25,17 +25,28 @@ class LaporanController extends Controller
 
         // $startDate = $request->input('start_date');
         // $endDate = $request->input('end_date');
-        $Idmesin = $request->input('mesin_id');
-        $month = $request->input('month');
+        // $Idmesin = $request->input('mesin_id');
+        // $month = $request->input('month');
 
-        $namaMesin = Mesin::find($Idmesin)->nama_mesin ?? 'nama_mesin';
-        $fileName = $namaMesin . '_' . str_replace('/', '-', $month) . '.xlsx';
+        // $namaMesin = Mesin::find($Idmesin)->nama_mesin ?? 'nama_mesin';
+        // $fileName = $namaMesin . '_' . str_replace('/', '-', $month) . '.xlsx';
 
-        return Excel::download(new LaporanExport($Idmesin, $month), $fileName);
+        // return Excel::download(new LaporanExport($Idmesin, $month), $fileName);
 
         // return Excel::download(new LaporanExport($Idmesin, $month), 'laporan.xlsx');
 
         // return Excel::download(new LaporanExport, 'laporan.xlsx');
+        $Idmesin = $request->input('mesin_id');
+        $month = $request->input('month');
+
+        $namaMesin = Mesin::find($Idmesin)->nama_mesin ?? 'nama_mesin';
+
+        $safeNamaMesin = preg_replace('/[\/\\\\:*?"<>|]/', '-', $namaMesin);
+        $safeMonth = preg_replace('/[\/\\\\:*?"<>|]/', '-', $month);
+
+        $fileName = $safeNamaMesin . '_' . $safeMonth . '.xlsx';
+
+        return Excel::download(new LaporanExport($Idmesin, $month), $fileName);
     }
 
     public function index()
