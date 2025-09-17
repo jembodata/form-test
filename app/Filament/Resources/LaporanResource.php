@@ -344,6 +344,7 @@ class LaporanResource extends Resource
                                     ->deleteAction(
                                         fn(\Filament\Forms\Components\Actions\Action $action) => $action->requiresConfirmation(),
                                     )
+                                    ->minItems(1)
                                     ->maxItems(5)
                                     ->columns(2)
                                     // ->itemLabel(function (array $state, $component): ?string {
