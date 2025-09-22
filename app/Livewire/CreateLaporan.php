@@ -67,12 +67,14 @@ class CreateLaporan extends Component implements HasForms, HasActions
                             ->searchable()
                             ->required()
                             ->preload()
+                            ->live()
                             ->maxItems(3),
                         Forms\Components\Select::make('shift')
                             ->placeholder('Pilih Shift')
                             ->label('Shift')
                             ->native(false)
                             ->required()
+                            ->live()
                             ->options([
                                 '1' => 'Shift 1',
                                 '2' => 'Shift 2',
@@ -147,6 +149,7 @@ class CreateLaporan extends Component implements HasForms, HasActions
                             ->mask(RawJs::make('$money($input)'))
                             ->stripCharacters(',')
                             ->numeric()
+                            ->live()
                             ->inputMode('decimal'),
                             // ->stripCharacters(['.', ',', ' ', "\u{00A0}"])
                             // ->live(debounce: 1000)
@@ -166,9 +169,10 @@ class CreateLaporan extends Component implements HasForms, HasActions
                             ->mask(RawJs::make('$money($input)'))
                             ->stripCharacters(',')
                             ->numeric()
+                            ->live()
                             ->inputMode('decimal')
                             // ->stripCharacters(['.', ',', ' ', "\u{00A0}"])
-                            ->live(debounce: 700)
+                            ->live(debounce: '1s')
                             ->reactive()
                             ->minValue(fn (Get $get) => (int) preg_replace('/\D+/', '', (string) $get('hour_meter_awal')))
                             ->afterStateUpdated(function ($livewire, Forms\Components\TextInput $component) {
@@ -506,7 +510,7 @@ class CreateLaporan extends Component implements HasForms, HasActions
         //         dd($data); // Untuk test
         //         // Laporan::create($data);
         //     });
-        dd($this->form->getState());
+        // dd($this->form->getState());
         // $post = Laporan::create($this->form->getState());
 
         // $this->form->model($post)->saveRelationships();

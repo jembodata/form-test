@@ -4,6 +4,7 @@ namespace App\Filament\Resources\LaporanResource\Pages;
 
 
 use App\Filament\Resources\LaporanResource;
+use App\Filament\Widgets\LatestLaporans;
 use App\Models\Laporan;
 use App\Models\Mesin;
 use Filament\Resources\Pages\ListRecords;
@@ -11,11 +12,21 @@ use Filament\Actions;
 use Filament\Forms;
 use Filament\Notifications\Notification;
 use Filament\Support;
+// use Filament\Pages\Concerns\ExposesTableToWidgets;
 
 
 class ListLaporans extends ListRecords
 {
+    // use ExposesTableToWidgets;
+
     protected static string $resource = LaporanResource::class;
+
+    // protected function getHeaderWidgets(): array
+    // {
+    //     return [
+    //         LatestLaporans::class,
+    //     ];
+    // }
 
     protected function getHeaderActions(): array
     {

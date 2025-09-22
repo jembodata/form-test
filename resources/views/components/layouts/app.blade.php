@@ -70,8 +70,8 @@
     @filamentScripts
     @vite('resources/js/app.js')
 
-    <div class="border-gray-200 py-4 text-center text-gray-500 text-sm">
-        Made with ❤️ by Aditiya (IT)
+    <div class="border-gray-200 py-4 text-center text-xs text-gray-500">
+        &copy; {{ date('Y') }} • Made with ❤️ by Aditiya (IT)
     </div>
 
     <script>

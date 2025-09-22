@@ -1,8 +1,9 @@
 <?php
 
 use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\LaporanPdfController;
 use App\Livewire\CreateLaporan;
-use App\Livewire\CreatePatient;
+// use App\Livewire\CreatePatient;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -15,3 +16,7 @@ Route::get('laporan/create', CreateLaporan::class);
 
 // Route::get('/export-laporan', [LaporanController::class, 'exportToExcel']);
 Route::get('/export-laporan', [LaporanController::class, 'exportToExcel'])->name('export.laporan');
+
+
+Route::get('/laporan/{laporan}/pdf', [LaporanPdfController::class, 'stream'])
+    ->name('laporan.pdf');

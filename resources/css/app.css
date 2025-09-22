@@ -2,3 +2,32 @@
 @tailwind components;
 @tailwind utilities;
 @tailwind variants;
+
+@layer components {
+    .card {
+      @apply relative rounded-xl border border-slate-200 bg-white text-slate-900 shadow-sm ring-1 ring-slate-200/60;
+    }
+    .card-header { @apply p-5; }
+    .card-title  { @apply text-sm font-medium text-slate-600; }
+    .card-content{ @apply px-5 pb-5; }
+  
+    .badge {
+      @apply inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium;
+    }
+    .badge-rose    { @apply bg-rose-100 text-rose-700 border border-rose-200; }
+    .badge-amber   { @apply bg-amber-100 text-amber-800 border border-amber-200; }
+    .badge-emerald { @apply bg-emerald-100 text-emerald-700 border border-emerald-200; }
+    .badge-slate   { @apply bg-slate-100 text-slate-700 border border-slate-200; }
+  
+    /* thin top accent bar like shadcn */
+    .accent-bar { @apply absolute inset-x-0 top-0 h-1 rounded-t-xl; }
+    .accent-rose    { @apply bg-gradient-to-r from-rose-400 to-rose-500; }
+    .accent-amber   { @apply bg-gradient-to-r from-amber-400 to-amber-500; }
+    .accent-emerald { @apply bg-gradient-to-r from-emerald-400 to-emerald-500; }
+    .accent-slate   { @apply bg-gradient-to-r from-slate-400 to-slate-500; }
+  
+    /* large number style */
+    .kpi-number { @apply text-5xl font-semibold leading-none tracking-tight; }
+    .muted      { @apply text-slate-500; }
+  }
+  

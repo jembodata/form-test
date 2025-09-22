@@ -7,12 +7,16 @@ use Filament\Tables;
 use Filament\Forms;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Carbon;
+use Illuminate\Database\Eloquent\Builder;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Widgets\TableWidget as BaseWidget;
 
 class LatestLaporans extends BaseWidget
 {
 
-    protected static ?int $indexRepeater = 0;
+    // protected static ?int $indexRepeater = 0;
+
 
     public function table(Table $table): Table
     {
@@ -43,6 +47,37 @@ class LatestLaporans extends BaseWidget
                     })
                     ->listWithLineBreaks(),
             ])
+            ->filters([
+                Tables\Filters\Filter::make('created_at')
+                    ->form([
+                        Forms\Components\DatePicker::make('created_from')
+                            ->placeholder(fn($state): string => 'Dec 18, ' . now()->subYear()->format('Y')),
+                        Forms\Components\DatePicker::make('created_until')
+                            ->placeholder(fn($state): string => now()->format('M d, Y')),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['created_from'] ?? null,
+                                fn(Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
+                            )
+                            ->when(
+                                $data['created_until'] ?? null,
+                                fn(Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
+                            );
+                    })
+                    ->indicateUsing(function (array $data): array {
+                        $indicators = [];
+                        if ($data['created_from'] ?? null) {
+                            $indicators['created_from'] = 'Laporan from ' . Carbon::parse($data['created_from'])->toFormattedDateString();
+                        }
+                        if ($data['created_until'] ?? null) {
+                            $indicators['created_until'] = 'Laporan until ' . Carbon::parse($data['created_until'])->toFormattedDateString();
+                        }
+
+                        return $indicators;
+                    }),
+                ], layout: FiltersLayout::Modal)
             ->actions([
                 // Tables\Actions\ViewAction::make()
                 //     ->label('Lihat Laporan')
