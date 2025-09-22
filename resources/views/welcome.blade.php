@@ -31,7 +31,7 @@
 </body> --}}
 
 <body class="min-h-screen antialiased text-gray-900 relative overflow-x-hidden">
-    {{-- <x-bg /> --}}
+    <x-bg />
     <!-- Topbar -->
     <div class="relative z-10">
         <header class="sticky top-0 z-30 bg-white/80 backdrop-blur border-b border-gray-200">

@@ -27,7 +27,7 @@
                                 <th class="w-40 px-4 py-3 text-left font-medium">Mesin</th>
                                 <th class="w-20 px-4 py-3 text-left font-medium">Shift</th>
                                 <th class="w-[28rem] px-4 py-3 text-left font-medium">Karyawan / NIK / OP</th>
-                                <th class="w-40 px-4 py-3 text-center font-medium">Action</th>
+                                <th class="w-40 px-4 py-3 text-left font-medium">Action</th>
                             </tr>
                         </thead>
 
@@ -103,7 +103,7 @@
 
                                             </div>
                                         </td>
-                                        <td class="px-4 py-3 text-right">
+                                        <td class="px-4 py-3 text-left">
                                             <a
                                                 href="{{ route('laporan.pdf', $row) }}"
                                                 target="_blank"
@@ -112,7 +112,7 @@
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-7 4h8M7 8h10M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h9l5 5v9a2 2 0 01-2 2z"/>
                                                 </svg>
-                                                Stream PDF
+                                                View PDF
                                             </a>
                                         </td>
                                     </tr>
