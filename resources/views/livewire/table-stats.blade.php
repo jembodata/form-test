@@ -2,26 +2,78 @@
     <!-- Container: fixed width & centered -->
     <div class="mx-auto w-full max-w-[1024px] px-3 sm:px-4">
         <!-- Header -->
-        <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-            {{-- <div>
-                <h2 class="text-lg sm:text-xl font-semibold tracking-tight">TableStats</h2>
-                <p class="text-sm text-gray-500">Latest Laporan — minimal, cepat, dan energizing.</p>
+        <div class="mb-4 flex flex-col sm:flex-row sm:items-end sm:justify-between">
+            <div class="flex w-full sm:justify-end">
+                <div class="w-full sm:w-80 ml-auto">
+                    <div class="relative">
+                        <label for="search" class="sr-only">Search</label>
+
+                        <input id="search" type="text" wire:model.debounce.100ms="search"
+                            wire:keydown.enter="submitSearch" placeholder="search Nama Mesin, NIK atau OP"
+                            class="w-full rounded-md border border-gray-300 bg-white pl-3 pr-28 py-2 text-sm text-gray-800 placeholder-gray-500 shadow-sm focus:border-gray-400 focus:ring-0"
+                            wire:loading.attr="disabled" wire:target="search,submitSearch" />
+
+                        {{-- Clear button --}}
+                        @if (!empty($search))
+                            <button type="button" wire:click="$set('search','')"
+                                class="absolute top-1 right-24 flex items-center justify-center h-8 w-8 rounded text-gray-500 hover:text-gray-700"
+                                aria-label="Clear search" title="Clear">✕</button>
+                        @endif
+
+                        {{-- Search button --}}
+                        <button type="button" wire:click="submitSearch"
+                            class="absolute top-1 right-1 flex items-center rounded bg-gray-800 py-1 px-2.5 text-sm font-medium text-white shadow-sm hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 disabled:pointer-events-none disabled:opacity-50"
+                            wire:loading.attr="disabled" wire:target="search,submitSearch">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                                class="w-4 h-4 mr-1.5">
+                                <path fill-rule="evenodd"
+                                    d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            Search
+                        </button>
+                    </div>
+
+                    {{-- Status text --}}
+                    {{-- <div class="mt-1 text-xs text-gray-600" wire:loading.remove wire:target="search,submitSearch">
+                        @if ($search)
+                            Filtering for: <span class="font-medium">{{ $search }}</span>
+                        @endif
+                    </div>
+                    <div class="mt-1 text-xs text-gray-600" wire:loading wire:target="search,submitSearch">
+                        Searching…
+                    </div> --}}
+                </div>
             </div>
-            <div class="text-sm text-gray-600">
-                Total: <span class="font-medium">{{ number_format($total) }}</span>
-            </div> --}}
         </div>
 
+
+
+
         <!-- Card -->
-        <div class="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+        <div class="rounded-xl border border-gray-300 bg-white shadow-sm overflow-hidden">
 
             <!-- TABLE (tablet & desktop) -->
             <div class="hidden md:block">
                 <!-- IMPORTANT: overflow-x-auto ensures horizontal scroll when needed -->
                 <div class="relative overflow-x-auto">
+
+                    <div class="pointer-events-none absolute inset-0 z-10 hidden items-center justify-center bg-white/60 md:flex"
+                        wire:loading wire:target="search">
+                        <div
+                            class="flex items-center gap-2 rounded-md border border-gray-200 bg-white px-3 py-2 shadow-sm">
+                            <svg class="h-4 w-4 animate-spin text-gray-700" viewBox="0 0 24 24" fill="none">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                    stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z">
+                                </path>
+                            </svg>
+                            <span class="text-sm text-gray-700">Searching…</span>
+                        </div>
+                    </div>
                     <!-- IMPORTANT: min-w forces scroll on tablet when cols overflow -->
                     <table class="lg:min-w-0 table-fixed text-sm">
-                        <thead class="bg-gray-50/80 text-gray-600">
+                        <thead thead class="bg-gray-100 text-gray-700">
                             <tr>
                                 <th class="w-32 px-4 py-3 text-left font-medium">Plant</th>
                                 <th class="w-40 px-4 py-3 text-left font-medium">Mesin</th>
@@ -57,7 +109,7 @@
                                                         @foreach ($names as $nm)
                                                             <span
                                                                 class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium
-                                                                bg-blue-50 text-blue-700 border-blue-200">
+                                                                bg-blue-50 text-blue-800 border-blue-300">
                                                                 {{ $nm }}
                                                             </span>
                                                         @endforeach
@@ -73,7 +125,7 @@
                                                         @foreach ($niks as $nik)
                                                             <span
                                                                 class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium
-                                                                bg-gray-50 text-gray-700 border-gray-200">
+                                                                bg-gray-100 text-gray-800 border-gray-300">
                                                                 {{ $nik }}
                                                             </span>
                                                         @endforeach
@@ -94,7 +146,7 @@
                                                         @foreach ($ops as $op)
                                                             <span
                                                                 class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium
-                bg-emerald-50 text-emerald-700 border-emerald-200">
+                bg-emerald-50 text-emerald-800 border-emerald-300">
                                                                 {{ $op }}
                                                             </span>
                                                         @endforeach
@@ -104,13 +156,13 @@
                                             </div>
                                         </td>
                                         <td class="px-4 py-3 text-left">
-                                            <a
-                                                href="{{ route('laporan.pdf', $row) }}"
-                                                target="_blank"
-                                                class="inline-flex items-center gap-2 rounded-md border border-gray-200 bg-white px-3.5 py-2.5 text-sm font-medium text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300"
-                                            >
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-7 4h8M7 8h10M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h9l5 5v9a2 2 0 01-2 2z"/>
+                                            <a href="{{ route('laporan.pdf', $row) }}" target="_blank"
+                                                class="inline-flex items-center gap-2 rounded-md border border-gray-200 bg-white px-3.5 py-2.5 text-sm font-medium text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+                                                    viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="1.5"
+                                                        d="M9 12h6m-7 4h8M7 8h10M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h9l5 5v9a2 2 0 01-2 2z" />
                                                 </svg>
                                                 View PDF
                                             </a>
@@ -220,7 +272,21 @@
                     @php
                         $last = $laporan->lastPage();
                         $current = $laporan->currentPage();
-                        $pages = $last <= 5 ? range(1, $last) : [1, 2, 'ellipsis', $last - 1, $last];
+
+                        if ($last <= 5) {
+                            // Small page counts: show everything
+                            $pages = range(1, $last);
+                        } else {
+                            if ($current <= 2 || $current >= $last - 1) {
+                                // Edges (Page 1–2 and Page (last-1)–last):
+                                // 1 2 … (last-1) last
+                                $pages = [1, 2, 'ellipsis', $last - 1, $last];
+                            } else {
+                                // Middle pages:
+                                // 1 2 … current … (last-1) last
+                                $pages = [1, 2, 'ellipsis', $current, 'ellipsis', $last - 1, $last];
+                            }
+                        }
 
                         $btn = function ($active = false, $edge = false) {
                             if ($active) {
@@ -238,21 +304,24 @@
                     <nav role="navigation" aria-label="Pagination" class="flex items-center justify-end gap-1">
                         {{-- Prev --}}
                         @if ($laporan->onFirstPage())
-                            <span class="{{ $btn(false, true) }} cursor-not-allowed opacity-60">Prev</span>
+                            <span
+                                class="{{ $btn(false, true) }} cursor-not-allowed bg-gray-100 text-gray-600 border-gray-300"
+                                aria-disabled="true">Prev</span>
                         @else
-                            <button type="button" wire:click="previousPage"
+                            <button type="button" wire:click="previousPage('{{ $pageName ?? 'laporanPage' }}')"
                                 class="{{ $btn(false, true) }}">Prev</button>
                         @endif
 
                         {{-- Numbers --}}
                         @foreach ($pages as $p)
                             @if ($p === 'ellipsis')
-                                <span class="px-2 text-gray-400 select-none">…</span>
+                                <span class="px-2 text-gray-500 select-none">…</span>
                             @else
                                 @if ($p == $current)
-                                    <span class="{{ $btn(true) }}">{{ $p }}</span>
+                                    <span class="{{ $btn(true) }}" aria-current="page">{{ $p }}</span>
                                 @else
-                                    <button type="button" wire:click="gotoPage({{ $p }})"
+                                    <button type="button"
+                                        wire:click="gotoPage({{ $p }}, '{{ $pageName ?? 'laporanPage' }}')"
                                         class="{{ $btn() }}">{{ $p }}</button>
                                 @endif
                             @endif
@@ -260,9 +329,12 @@
 
                         {{-- Next --}}
                         @if ($laporan->hasMorePages())
-                            <button type="button" wire:click="nextPage" class="{{ $btn(false, true) }}">Next</button>
+                            <button type="button" wire:click="nextPage('{{ $pageName ?? 'laporanPage' }}')"
+                                class="{{ $btn(false, true) }}">Next</button>
                         @else
-                            <span class="{{ $btn(false, true) }} cursor-not-allowed opacity-60">Next</span>
+                            <span
+                                class="{{ $btn(false, true) }} cursor-not-allowed bg-gray-100 text-gray-600 border-gray-300"
+                                aria-disabled="true">Next</span>
                         @endif
                     </nav>
                 @endif
