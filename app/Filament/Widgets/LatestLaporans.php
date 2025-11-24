@@ -16,7 +16,8 @@ class LatestLaporans extends BaseWidget
 {
 
     // protected static ?int $indexRepeater = 0;
-
+    // hide widget from discover admin panel
+    protected static bool $isDiscovered = false;
 
     public function table(Table $table): Table
     {

@@ -13,7 +13,6 @@ use Filament\Forms\Form;
 use Filament\Support\RawJs;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
-// use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
@@ -39,10 +38,10 @@ class CreateLaporan extends Component implements HasForms, HasActions
             ->schema([
                 Forms\Components\Grid::make(4)
                     ->schema([
-                        Forms\Components\TextInput::make('kode_laporan')
-                            ->label('Kode Laporan')
-                            ->placeholder('Auto Generate')
-                            ->readOnly(), // Hanya menampilkan, tidak bisa diedit
+                        // Forms\Components\TextInput::make('kode_laporan')
+                        //     ->label('Kode Laporan')
+                        //     ->placeholder('Auto Generate')
+                        //     ->readOnly(),
                     ]),
 
                 Forms\Components\Fieldset::make('Label')
@@ -140,8 +139,8 @@ class CreateLaporan extends Component implements HasForms, HasActions
                             ->afterStateUpdated(function (callable $get, callable $set) {
                                 // Setelah mesin_id dipilih, update kode_laporan
                                 $mesinId = $get('mesin_id');
-                                $kodeLaporan = self::generateKodeLaporan($mesinId);
-                                $set('kode_laporan', $kodeLaporan); // Update kode_laporan
+                                // $kodeLaporan = self::generateKodeLaporan($mesinId);
+                                // $set('kode_laporan', $kodeLaporan); // Update kode_laporan
                             }),
                         Forms\Components\TextInput::make('hour_meter_awal')
                             ->placeholder('input Hour Meter Awal')
@@ -151,18 +150,18 @@ class CreateLaporan extends Component implements HasForms, HasActions
                             ->numeric()
                             ->live()
                             ->inputMode('decimal'),
-                            // ->stripCharacters(['.', ',', ' ', "\u{00A0}"])
-                            // ->live(debounce: 1000)
-                            // ->reactive()
-                            // ->maxValue(fn (Get $get) => (int) preg_replace('/\D+/', '', (string) $get('hour_meter_akhir')))
-                            // ->maxValue(function (Get $get) {
-                            //     $raw = (string) $get('hour_meter_akhir');
-                            //     $digits = preg_replace('/\D+/', '', $raw ?? '');
-                            //     return $digits !== '' ? (int) $digits : null; // <- penting
-                            // })
-                            // ->afterStateUpdated(function ($livewire, Forms\Components\TextInput $component) {
-                            //     $livewire->validateOnly($component->getStatePath());
-                            // }),
+                        // ->stripCharacters(['.', ',', ' ', "\u{00A0}"])
+                        // ->live(debounce: 1000)
+                        // ->reactive()
+                        // ->maxValue(fn (Get $get) => (int) preg_replace('/\D+/', '', (string) $get('hour_meter_akhir')))
+                        // ->maxValue(function (Get $get) {
+                        //     $raw = (string) $get('hour_meter_akhir');
+                        //     $digits = preg_replace('/\D+/', '', $raw ?? '');
+                        //     return $digits !== '' ? (int) $digits : null; // <- penting
+                        // })
+                        // ->afterStateUpdated(function ($livewire, Forms\Components\TextInput $component) {
+                        //     $livewire->validateOnly($component->getStatePath());
+                        // }),
                         Forms\Components\TextInput::make('hour_meter_akhir')
                             ->placeholder('input Hour Meter Akhir')
                             ->required()
@@ -174,7 +173,7 @@ class CreateLaporan extends Component implements HasForms, HasActions
                             // ->stripCharacters(['.', ',', ' ', "\u{00A0}"])
                             ->live(debounce: '1s')
                             ->reactive()
-                            ->minValue(fn (Get $get) => (int) preg_replace('/\D+/', '', (string) $get('hour_meter_awal')))
+                            ->minValue(fn(Get $get) => (int) preg_replace('/\D+/', '', (string) $get('hour_meter_awal')))
                             ->afterStateUpdated(function ($livewire, Forms\Components\TextInput $component) {
                                 $livewire->validateOnly($component->getStatePath());
                             }),
@@ -187,7 +186,7 @@ class CreateLaporan extends Component implements HasForms, HasActions
                             ->label('Production Details')
                             ->schema([
                                 Forms\Components\Repeater::make('detail_produksi')
-                                    ->hint('Anda bisa menambahkan hingga 5 detail produksi dalam satu laporan.')
+                                    ->hint('Anda bisa menambahkan hingga 10 detail produksi dalam satu laporan.')
                                     ->schema([
                                         Forms\Components\Section::make([
                                             Forms\Components\TextInput::make('persiapan')
@@ -238,10 +237,14 @@ class CreateLaporan extends Component implements HasForms, HasActions
                                                 ->numeric()
                                                 ->suffix('Jam')
                                                 ->minValue(0)
-                                                ->maxValue(12)
+                                                ->maxValue(8)
                                                 ->live(debounce: 500)
                                                 ->afterStateUpdated(function ($livewire, Forms\Components\TextInput $component) {
-                                                    $livewire->validateOnly($component->getStatePath());
+                                                    $selfPath = $component->getStatePath();
+                                                    $livewire->validateOnly($selfPath);
+
+                                                    $kendalaPath = str_replace('gangguan', 'kendala', $selfPath);
+                                                    $livewire->validateOnly($kendalaPath);
                                                 }),
                                         ])
                                             ->description('Mohon Teliti dan isi dengan benar, isi 0 jika tidak ada')
@@ -298,7 +301,7 @@ class CreateLaporan extends Component implements HasForms, HasActions
                                                     ->label('No OP')
                                                     ->placeholder('input nomor OP')
                                                     ->extraInputAttributes(['onInput' => 'this.value = this.value.toUpperCase()'])
-                                                    ->maxLength(10)
+                                                    ->maxLength(15)
                                                     ->required()
                                                     ->live(debounce: 500)
                                                     ->afterStateUpdated(function ($livewire, Forms\Components\TextInput $component) {
@@ -356,6 +359,7 @@ class CreateLaporan extends Component implements HasForms, HasActions
                                                     ])
                                                     ->columns(2)
                                                     ->gridDirection('row')
+                                                    ->required(fn(Get $get) => (float) $get('gangguan') > 0)
                                                     ->rules([
                                                         function () {
                                                             return function (string $attribute, $value, $fail) {
@@ -377,12 +381,12 @@ class CreateLaporan extends Component implements HasForms, HasActions
                                             ]),
                                     ])
                                     ->collapsed()
-                                    ->cloneable()
+                                    ->cloneable(false)
                                     ->deleteAction(
                                         fn(\Filament\Forms\Components\Actions\Action $action) => $action->requiresConfirmation(),
                                     )
                                     ->minItems(1)
-                                    ->maxItems(5)
+                                    ->maxItems(10)
                                     ->columns(2)
                                     // ->itemLabel(function (array $state, $component): ?string {
 
@@ -483,6 +487,36 @@ class CreateLaporan extends Component implements HasForms, HasActions
         return Action::make('create')
             ->requiresConfirmation()
             ->action(function () {
+
+                $formState = $this->form->getState();
+
+                $detailProduksi = $formState['detail_produksi'] ?? [];
+
+                $isValid = false;
+
+                foreach ($detailProduksi as $item) {
+                    if (
+                        $item['persiapan'] > 0 ||
+                        $item['operation'] > 0 ||
+                        $item['reloading'] > 0 ||
+                        $item['gangguan'] > 0
+                    ) {
+                        $isValid = true;
+                        break;
+                    }
+                }
+
+                if (!$isValid) {
+                    Notification::make()
+                        ->title('ALERT')
+                        ->body('Minimal satu field PORG dalam Detail Produksi harus diisi dengan nilai lebih dari 0.')
+                        ->danger()
+                        ->seconds(10)
+                        ->send();
+
+                    return;
+                }
+
                 $this->closeActionModal();
                 // dd($this->form->getState());
                 $post = Laporan::create($this->form->getState());
@@ -490,8 +524,9 @@ class CreateLaporan extends Component implements HasForms, HasActions
 
                 Notification::make()
                     ->title('Laporan Berhasil dibuat')
+                    ->body("Kode Laporan: **{$post->kode_laporan}**")
                     ->success()
-                    ->seconds(5)
+                    ->seconds(10)
                     ->send();
 
                 $this->form->fill();
@@ -529,41 +564,41 @@ class CreateLaporan extends Component implements HasForms, HasActions
         return view('livewire.create-laporan');
     }
 
-    public static function generateKodeLaporan($mesinId): string
-    {
-        $mesin = Mesin::find($mesinId);
-        if (!$mesin) return 'Invalid Mesin';
+    // public static function generateKodeLaporan($mesinId): string
+    // {
+    //     $mesin = Mesin::find($mesinId);
+    //     if (!$mesin) return 'Invalid Mesin';
 
-        $plantCode = trim($mesin->nama_plant);
-        $mesinCode = trim($mesin->nama_mesin);
-        $yy        = now()->format('y');
+    //     $plantCode = trim($mesin->nama_plant);
+    //     $mesinCode = trim($mesin->nama_mesin);
+    //     $yy        = now()->format('y');
 
-        $width  = 5;                              // 5 digit
-        $prefix = "{$plantCode}{$yy}{$mesinCode}-"; // contoh: A25AW-1-
+    //     $width  = 5;                              // 5 digit
+    //     $prefix = "{$plantCode}{$yy}{$mesinCode}-"; // contoh: A25AW-1-
 
-        // Hanya ambil yang panjangnya pas: prefix + 5 char
-        $likeFixed = $prefix . str_repeat('_', $width);
+    //     // Hanya ambil yang panjangnya pas: prefix + 5 char
+    //     $likeFixed = $prefix . str_repeat('_', $width);
 
-        // Ambil last berbasis angka suffix (MySQL)
-        $last = Laporan::where('kode_laporan', 'like', $likeFixed)
-            ->orderByRaw('CAST(RIGHT(kode_laporan, ?) AS UNSIGNED) DESC', [$width])
-            ->first();
+    //     // Ambil last berbasis angka suffix (MySQL)
+    //     $last = Laporan::where('kode_laporan', 'like', $likeFixed)
+    //         ->orderByRaw('CAST(RIGHT(kode_laporan, ?) AS UNSIGNED) DESC', [$width])
+    //         ->first();
 
-        $pattern = '/^' . preg_quote($prefix, '/') . '(\d{' . $width . '})$/';
+    //     $pattern = '/^' . preg_quote($prefix, '/') . '(\d{' . $width . '})$/';
 
-        $next = 1;
-        if ($last && preg_match($pattern, trim($last->kode_laporan), $m)) {
-            $next = (int) $m[1] + 1;
-        }
+    //     $next = 1;
+    //     if ($last && preg_match($pattern, trim($last->kode_laporan), $m)) {
+    //         $next = (int) $m[1] + 1;
+    //     }
 
-        $max = (10 ** $width) - 1; // 99999
-        if ($next > $max) {
-            // ganti sesuai kebijakanmu: ValidationException/notify Filament/return null
-            throw new RuntimeException('Nomor urut sudah mencapai ' . $max . ' untuk tahun ini.');
-        }
+    //     $max = (10 ** $width) - 1; // 99999
+    //     if ($next > $max) {
+    //         // ganti sesuai kebijakanmu: ValidationException/notify Filament/return null
+    //         throw new RuntimeException('Nomor urut sudah mencapai ' . $max . ' untuk tahun ini.');
+    //     }
 
-        return $prefix . str_pad((string) $next, $width, '0', STR_PAD_LEFT);
-    }
+    //     return $prefix . str_pad((string) $next, $width, '0', STR_PAD_LEFT);
+    // }
 
     // public static function generateKodeLaporan($mesinId)
     // {

@@ -5,8 +5,10 @@ namespace App\Filament\Resources;
 use App\Filament\Exports\LaporanExporter;
 use App\Filament\Resources\LaporanResource\Pages;
 use App\Filament\Resources\LaporanResource\RelationManagers;
+use Malzariey\FilamentDaterangepickerFilter\Filters\DateRangeFilter;
 use App\Models\Laporan;
 use App\Models\Mesin;
+use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -36,10 +38,10 @@ class LaporanResource extends Resource
             ->schema([
                 Forms\Components\Grid::make(4)
                     ->schema([
-                        Forms\Components\TextInput::make('kode_laporan')
-                            ->label('Kode Laporan')
-                            ->placeholder('Auto Generate')
-                            ->readOnly(), // Hanya menampilkan, tidak bisa diedit
+                        // Forms\Components\TextInput::make('kode_laporan')
+                        //     ->label('Kode Laporan')
+                        //     ->placeholder('Auto Generate')
+                        //     ->readOnly(),
                     ]),
 
                 Forms\Components\Fieldset::make('Label')
@@ -370,8 +372,8 @@ class LaporanResource extends Resource
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('dibuat pada')
                     ->dateTime(),
-                Tables\Columns\TextColumn::make('kode_laporan')
-                    ->searchable(),
+                // Tables\Columns\TextColumn::make('kode_laporan')
+                //     ->searchable(),
                 Tables\Columns\TextColumn::make('karyawans.nama')
                     ->label('Nama')
                     ->listWithLineBreaks()
@@ -422,13 +424,39 @@ class LaporanResource extends Resource
             ->defaultPaginationPageOption(25)
             ->paginated([10, 25, 50, 100,])
             ->filters([
-                //
+                Tables\Filters\Filter::make('plant')
+                    ->form([
+                        Forms\Components\Select::make('nama_plant')
+                            ->label('Nama Plant')
+                            ->options(
+                                Mesin::query()
+                                    ->select('nama_plant')
+                                    ->distinct()
+                                    ->orderBy('nama_plant')
+                                    ->pluck('nama_plant', 'nama_plant')
+                            )
+                            ->searchable()
+                            ->preload(),
+                    ])
+                    ->query(
+                        fn($query, array $data) =>
+                        $query->when(
+                            $data['nama_plant'] ?? null,
+                            fn($q, $plant) =>
+                            $q->whereHas('mesins', fn($mq) => $mq->where('nama_plant', $plant))
+                        )
+                    ),
+
                 Tables\Filters\SelectFilter::make('shift')
                     ->options([
                         '1' => 'Shift 1',
                         '2' => 'Shift 2',
                         '3' => 'Shift 3',
-                    ]),
+                    ])
+                    ->native(false),
+                DateRangeFilter::make('created_at')
+                    ->label('Tanggal Laporan')
+                    ->maxDate(Carbon::now()->endOfMonth()),
             ])
             ->headerActions([
                 // Tables\Actions\ExportAction::make()
@@ -479,215 +507,211 @@ class LaporanResource extends Resource
                 //     }),
             ])
             ->actions([
-                Tables\Actions\ActionGroup::make([
-                    Tables\Actions\ViewAction::make(),
-                    Tables\Actions\EditAction::make(),
-                    // Tables\Actions\EditAction::make()
-                    //     ->form([
-                    //         Forms\Components\Grid::make(4)
-                    //             ->schema([
-                    //                 Forms\Components\Fieldset::make('Label')
-                    //                     ->label('Production Details')
-                    //                     ->schema([
-                    //                         Forms\Components\Repeater::make('detail_produksi')
-                    //                             ->schema([
-                    //                                 Forms\Components\Section::make([
-                    //                                     Forms\Components\TextInput::make('persiapan')
-                    //                                         ->label('Persiapan')
-                    //                                         ->placeholder('0')
-                    //                                         // ->default('0')
-                    //                                         ->numeric()
-                    //                                         ->suffix('Jam')
-                    //                                         ->live()
-                    //                                         ->minValue(0)
-                    //                                         ->maxValue(12)
-                    //                                         ->live(debounce: 500)
-                    //                                         ->afterStateUpdated(function ($livewire, Forms\Components\TextInput $component) {
-                    //                                             $livewire->validateOnly($component->getStatePath());
-                    //                                         }),
-                    //                                     Forms\Components\TextInput::make('operation')
-                    //                                         ->label('Operation')
-                    //                                         ->placeholder('0')
-                    //                                         // ->default('0')
-                    //                                         ->numeric()
-                    //                                         ->suffix('Jam')
-                    //                                         ->minValue(0)
-                    //                                         ->maxValue(12)
-                    //                                         ->live(debounce: 500)
-                    //                                         ->afterStateUpdated(function ($livewire, Forms\Components\TextInput $component) {
-                    //                                             $livewire->validateOnly($component->getStatePath());
-                    //                                         }),
-                    //                                     Forms\Components\TextInput::make('reloading')
-                    //                                         ->label('Reloading')
-                    //                                         ->placeholder('0')
-                    //                                         // ->default('0')
-                    //                                         ->numeric()
-                    //                                         ->suffix('Jam')
-                    //                                         ->minValue(0)
-                    //                                         ->maxValue(12)
-                    //                                         ->live(debounce: 500)
-                    //                                         ->afterStateUpdated(function ($livewire, Forms\Components\TextInput $component) {
-                    //                                             $livewire->validateOnly($component->getStatePath());
-                    //                                         }),
-                    //                                     Forms\Components\TextInput::make('gangguan')
-                    //                                         ->label('Gangguan')
-                    //                                         ->placeholder('0')
-                    //                                         // ->default('0')
-                    //                                         ->numeric()
-                    //                                         ->suffix('Jam')
-                    //                                         ->minValue(0)
-                    //                                         ->maxValue(12)
-                    //                                         ->live(debounce: 500)
-                    //                                         ->afterStateUpdated(function ($livewire, Forms\Components\TextInput $component) {
-                    //                                             $livewire->validateOnly($component->getStatePath());
-                    //                                         }),
-                    //                                 ])
-                    //                                     ->description('Mohon Teliti dan isi dengan benar')
-                    //                                     ->columns(4),
-                    //                                 Forms\Components\Section::make('')
-                    //                                     ->description('Mohon Teliti dan isi dengan benar')
-                    //                                     ->columns(3)
-                    //                                     ->schema([
-                    //                                         Forms\Components\TextInput::make('customers')
-                    //                                             ->placeholder('input nama pelanggan')
-                    //                                             ->label('Customers')
-                    //                                             ->extraInputAttributes(['onInput' => 'this.value = this.value.toUpperCase()'])
-                    //                                             ->required(),
-                    //                                         Forms\Components\Select::make('proses')
-                    //                                             ->placeholder('input nama proses')
-                    //                                             ->label('Proses')
-                    //                                             ->searchable()
-                    //                                             ->required()
-                    //                                             ->options([
-                    //                                                 'Coloring' => 'Coloring',
-                    //                                                 'Tubing' => 'Tubing',
-                    //                                                 'Outer Sheath' => 'Outer Sheath',
-                    //                                                 'Drop Cable' => 'Drop Cable',
-                    //                                                 'Inner Sheath' => 'Inner Sheath',
-                    //                                                 'Stranding' => 'Stranding',
-                    //                                                 'Armour' => 'Armour',
-                    //                                                 'Wrapping' => 'Wrapping',
-                    //                                                 'Insulation' => 'Insulation',
-                    //                                                 'Screen' => 'Screen',
-                    //                                                 'Taping' => 'Taping',
-                    //                                                 'Armouring' => 'Armouring',
-                    //                                                 'Rewind' => 'Rewind',
-                    //                                                 'Repair' => 'Repair',
-                    //                                                 'Inner Sheathing' => 'Inner Sheathing',
-                    //                                                 'Separation Sheathing' => 'Separation Sheathing',
-                    //                                                 'Outersheathing' => 'Outersheathing',
-                    //                                                 'Tin' => 'Tin',
-                    //                                                 'Micatape' => 'Micatape',
-                    //                                                 'Twist' => 'Twist',
-                    //                                                 'Cabling' => 'Cabling',
-                    //                                                 'Inner' => 'Inner',
-                    //                                                 'Braiding' => 'Braiding',
-                    //                                                 'Outer' => 'Outer',
-                    //                                                 'Rewind Marking' => 'Rewind Marking',
-                    //                                                 'Drawing' => 'Drawing',
-                    //                                                 'Bunching' => 'Bunching',
-                    //                                                 'Insul' => 'Insul',
-                    //                                                 'Coiling' => 'Coiling',
-                    //                                             ])
-                    //                                             ->native(false),
-                    //                                         Forms\Components\TextInput::make('op')
-                    //                                             ->label('No OP')
-                    //                                             ->placeholder('input nomor OP')
-                    //                                             ->extraInputAttributes(['onInput' => 'this.value = this.value.toUpperCase()'])
-                    //                                             ->maxLength(10)
-                    //                                             ->required()
-                    //                                             ->live(debounce: 500)
-                    //                                             ->afterStateUpdated(function ($livewire, Forms\Components\TextInput $component) {
-                    //                                                 $livewire->validateOnly($component->getStatePath());
-                    //                                             }),
-                    //                                         Forms\Components\TextInput::make('type_size')
-                    //                                             ->placeholder('input Type & Size')
-                    //                                             ->label('Type & Size')
-                    //                                             ->extraInputAttributes(['onInput' => 'this.value = this.value.toUpperCase()'])
-                    //                                             ->required(),
-                    //                                         Forms\Components\TextInput::make('ouput_per_order')
-                    //                                             ->label('Output')
-                    //                                             ->mask(RawJs::make('$money($input)'))
-                    //                                             ->stripCharacters(',')
-                    //                                             ->placeholder('input dalam angka')
-                    //                                             ->numeric()
-                    //                                             ->inputMode('decimal')
-                    //                                             ->suffix('Meter')
-                    //                                             ->required(),
-                    //                                         Forms\Components\TextInput::make('line_speed')
-                    //                                             ->label('Line Speed')
-                    //                                             ->placeholder('0')
-                    //                                             ->numeric()
-                    //                                             ->minValue(0)
-                    //                                             ->live(debounce: 500)
-                    //                                             ->afterStateUpdated(function ($livewire, Forms\Components\TextInput $component) {
-                    //                                                 $livewire->validateOnly($component->getStatePath());
-                    //                                             }),
-                    //                                     ]),
-                    //                                 Forms\Components\Section::make('Kendala & Keterangan')
-                    //                                     ->description('Isi jika ada, Mohon Teliti dan isi dengan benar')
-                    //                                     ->collapsed()
-                    //                                     ->columns(2)
-                    //                                     ->schema([
-                    //                                         Forms\Components\CheckboxList::make('kendala')
-                    //                                             ->label('Kendala')
-                    //                                             ->options([
-                    //                                                 'TOP' => 'TOP',
-                    //                                                 'GO' => 'GO',
-                    //                                                 'TBP' => 'TBP',
-                    //                                                 'TBK' => 'TBK',
-                    //                                                 'TPS' => 'TPS',
-                    //                                                 'MR' => 'MR',
-                    //                                                 'TAT' => 'TAT',
-                    //                                                 'TAO' => 'TAO',
-                    //                                                 'TB' => 'TB',
-                    //                                                 'CO' => 'CO',
-                    //                                                 'lain' => 'Lainnya',
-                    //                                             ])
-                    //                                             ->columns(2)
-                    //                                             ->gridDirection('row')
-                    //                                             ->rules([
-                    //                                                 function () {
-                    //                                                     return function (string $attribute, $value, $fail) {
-                    //                                                         if (count($value) > 3) {
-                    //                                                             $fail("Kendala tidak boleh lebih dari 3 pilihan.");
-                    //                                                         }
-                    //                                                     };
-                    //                                                 },
-                    //                                             ])
-                    //                                             ->live(debounce: 500)
-                    //                                             ->afterStateUpdated(function ($livewire, Forms\Components\CheckboxList $component) {
-                    //                                                 $livewire->validateOnly($component->getStatePath());
-                    //                                             }),
-                    //                                         Forms\Components\Textarea::make('keterangan')
-                    //                                             ->label('Keterangan')
-                    //                                             ->rows(9)
-                    //                                             ->cols(10)
-                    //                                             ->disableGrammarly(),
-                    //                                     ]),
-                    //                             ])
-                    //                             ->collapsed()
-                    //                             ->cloneable()
-                    //                             ->deleteAction(
-                    //                                 fn(\Filament\Forms\Components\Actions\Action $action) => $action->requiresConfirmation(),
-                    //                             )
-                    //                             ->maxItems(5)
-                    //                             ->columns(2)
-                    //                             // ->itemLabel(function (array $state, $component): ?string {
+                Tables\Actions\EditAction::make()
+                    ->label('Edit Detail Produksi')
+                    ->form([
+                        Forms\Components\Grid::make(4)
+                            ->schema([
+                                Forms\Components\Fieldset::make('Label')
+                                    ->label('Production Details')
+                                    ->schema([
+                                        Forms\Components\Repeater::make('detail_produksi')
+                                            ->schema([
+                                                Forms\Components\Section::make([
+                                                    Forms\Components\TextInput::make('persiapan')
+                                                        ->label('Persiapan')
+                                                        ->placeholder('0')
+                                                        // ->default('0')
+                                                        ->numeric()
+                                                        ->suffix('Jam')
+                                                        ->live()
+                                                        ->minValue(0)
+                                                        ->maxValue(12)
+                                                        ->live(debounce: 500)
+                                                        ->afterStateUpdated(function ($livewire, Forms\Components\TextInput $component) {
+                                                            $livewire->validateOnly($component->getStatePath());
+                                                        }),
+                                                    Forms\Components\TextInput::make('operation')
+                                                        ->label('Operation')
+                                                        ->placeholder('0')
+                                                        // ->default('0')
+                                                        ->numeric()
+                                                        ->suffix('Jam')
+                                                        ->minValue(0)
+                                                        ->maxValue(12)
+                                                        ->live(debounce: 500)
+                                                        ->afterStateUpdated(function ($livewire, Forms\Components\TextInput $component) {
+                                                            $livewire->validateOnly($component->getStatePath());
+                                                        }),
+                                                    Forms\Components\TextInput::make('reloading')
+                                                        ->label('Reloading')
+                                                        ->placeholder('0')
+                                                        // ->default('0')
+                                                        ->numeric()
+                                                        ->suffix('Jam')
+                                                        ->minValue(0)
+                                                        ->maxValue(12)
+                                                        ->live(debounce: 500)
+                                                        ->afterStateUpdated(function ($livewire, Forms\Components\TextInput $component) {
+                                                            $livewire->validateOnly($component->getStatePath());
+                                                        }),
+                                                    Forms\Components\TextInput::make('gangguan')
+                                                        ->label('Gangguan')
+                                                        ->placeholder('0')
+                                                        // ->default('0')
+                                                        ->numeric()
+                                                        ->suffix('Jam')
+                                                        ->minValue(0)
+                                                        ->maxValue(12)
+                                                        ->live(debounce: 500)
+                                                        ->afterStateUpdated(function ($livewire, Forms\Components\TextInput $component) {
+                                                            $livewire->validateOnly($component->getStatePath());
+                                                        }),
+                                                ])
+                                                    ->description('Mohon Teliti dan isi dengan benar')
+                                                    ->columns(4),
+                                                Forms\Components\Section::make('')
+                                                    ->description('Mohon Teliti dan isi dengan benar')
+                                                    ->columns(3)
+                                                    ->schema([
+                                                        Forms\Components\TextInput::make('customers')
+                                                            ->placeholder('input nama pelanggan')
+                                                            ->label('Customers')
+                                                            ->extraInputAttributes(['onInput' => 'this.value = this.value.toUpperCase()'])
+                                                            ->required(),
+                                                        Forms\Components\Select::make('proses')
+                                                            ->placeholder('input nama proses')
+                                                            ->label('Proses')
+                                                            ->searchable()
+                                                            ->required()
+                                                            ->options([
+                                                                'Coloring' => 'Coloring',
+                                                                'Tubing' => 'Tubing',
+                                                                'Outer Sheath' => 'Outer Sheath',
+                                                                'Drop Cable' => 'Drop Cable',
+                                                                'Inner Sheath' => 'Inner Sheath',
+                                                                'Stranding' => 'Stranding',
+                                                                'Armour' => 'Armour',
+                                                                'Wrapping' => 'Wrapping',
+                                                                'Insulation' => 'Insulation',
+                                                                'Screen' => 'Screen',
+                                                                'Taping' => 'Taping',
+                                                                'Armouring' => 'Armouring',
+                                                                'Rewind' => 'Rewind',
+                                                                'Repair' => 'Repair',
+                                                                'Inner Sheathing' => 'Inner Sheathing',
+                                                                'Separation Sheathing' => 'Separation Sheathing',
+                                                                'Outersheathing' => 'Outersheathing',
+                                                                'Tin' => 'Tin',
+                                                                'Micatape' => 'Micatape',
+                                                                'Twist' => 'Twist',
+                                                                'Cabling' => 'Cabling',
+                                                                'Inner' => 'Inner',
+                                                                'Braiding' => 'Braiding',
+                                                                'Outer' => 'Outer',
+                                                                'Rewind Marking' => 'Rewind Marking',
+                                                                'Drawing' => 'Drawing',
+                                                                'Bunching' => 'Bunching',
+                                                                'Insul' => 'Insul',
+                                                                'Coiling' => 'Coiling',
+                                                            ])
+                                                            ->native(false),
+                                                        Forms\Components\TextInput::make('op')
+                                                            ->label('No OP')
+                                                            ->placeholder('input nomor OP')
+                                                            ->extraInputAttributes(['onInput' => 'this.value = this.value.toUpperCase()'])
+                                                            ->maxLength(10)
+                                                            ->required()
+                                                            ->live(debounce: 500)
+                                                            ->afterStateUpdated(function ($livewire, Forms\Components\TextInput $component) {
+                                                                $livewire->validateOnly($component->getStatePath());
+                                                            }),
+                                                        Forms\Components\TextInput::make('type_size')
+                                                            ->placeholder('input Type & Size')
+                                                            ->label('Type & Size')
+                                                            ->extraInputAttributes(['onInput' => 'this.value = this.value.toUpperCase()'])
+                                                            ->required(),
+                                                        Forms\Components\TextInput::make('ouput_per_order')
+                                                            ->label('Output')
+                                                            ->mask(RawJs::make('$money($input)'))
+                                                            ->stripCharacters(',')
+                                                            ->placeholder('input dalam angka')
+                                                            ->numeric()
+                                                            ->inputMode('decimal')
+                                                            ->suffix('Meter')
+                                                            ->required(),
+                                                        Forms\Components\TextInput::make('line_speed')
+                                                            ->label('Line Speed')
+                                                            ->placeholder('0')
+                                                            ->numeric()
+                                                            ->minValue(0)
+                                                            ->live(debounce: 500)
+                                                            ->afterStateUpdated(function ($livewire, Forms\Components\TextInput $component) {
+                                                                $livewire->validateOnly($component->getStatePath());
+                                                            }),
+                                                    ]),
+                                                Forms\Components\Section::make('Kendala & Keterangan')
+                                                    ->description('Isi jika ada, Mohon Teliti dan isi dengan benar')
+                                                    ->collapsed()
+                                                    ->columns(2)
+                                                    ->schema([
+                                                        Forms\Components\CheckboxList::make('kendala')
+                                                            ->label('Kendala')
+                                                            ->options([
+                                                                'TOP' => 'TOP',
+                                                                'GO' => 'GO',
+                                                                'TBP' => 'TBP',
+                                                                'TBK' => 'TBK',
+                                                                'TPS' => 'TPS',
+                                                                'MR' => 'MR',
+                                                                'TAT' => 'TAT',
+                                                                'TAO' => 'TAO',
+                                                                'TB' => 'TB',
+                                                                'CO' => 'CO',
+                                                                'lain' => 'Lainnya',
+                                                            ])
+                                                            ->columns(2)
+                                                            ->gridDirection('row')
+                                                            ->rules([
+                                                                function () {
+                                                                    return function (string $attribute, $value, $fail) {
+                                                                        if (count($value) > 3) {
+                                                                            $fail("Kendala tidak boleh lebih dari 3 pilihan.");
+                                                                        }
+                                                                    };
+                                                                },
+                                                            ])
+                                                            ->live(debounce: 500)
+                                                            ->afterStateUpdated(function ($livewire, Forms\Components\CheckboxList $component) {
+                                                                $livewire->validateOnly($component->getStatePath());
+                                                            }),
+                                                        Forms\Components\Textarea::make('keterangan')
+                                                            ->label('Keterangan')
+                                                            ->rows(9)
+                                                            ->cols(10)
+                                                            ->disableGrammarly(),
+                                                    ]),
+                                            ])
+                                            ->collapsed()
+                                            ->cloneable()
+                                            ->deleteAction(
+                                                fn(\Filament\Forms\Components\Actions\Action $action) => $action->requiresConfirmation(),
+                                            )
+                                            ->maxItems(5)
+                                            ->columns(2)
+                                            // ->itemLabel(function (array $state, $component): ?string {
 
-                    //                             //     $key = array_search($state, $component->getState());
-                    //                             //     $index = array_search($key, array_keys($component->getState()));
+                                            //     $key = array_search($state, $component->getState());
+                                            //     $index = array_search($key, array_keys($component->getState()));
 
-                    //                             //     return $index + 1;
-                    //                             // }),
-                    //                             ->itemLabel(fn() => __('Data') . ' ' . ++self::$indexRepeater)
-                    //                             ->addActionLabel('Tambah Detail Produksi')
-                    //                     ])
-                    //                     ->columns(1),
-                    //             ]),
-                    //     ])
-                ]),
-
+                                            //     return $index + 1;
+                                            // }),
+                                            ->itemLabel(fn() => __('Data') . ' ' . ++self::$indexRepeater)
+                                            ->addActionLabel('Tambah Detail Produksi')
+                                    ])
+                                    ->columns(1),
+                            ]),
+                    ])
 
                 // Tables\Actions\EditAction::make()
                 //     ->mutateRecordDataUsing(function (array $data) {
